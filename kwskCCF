@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CCF  Rev.1.2.8</title>
+
+<style type="text/css">  
+input[type="button"],input[type="submit"] {
+	-webkit-appearance: none;
+	border-radius: 5px;
+	border: 1px solid #DDD;
+	cursor: pointer;
+}
+</style>
+
+<form name="ctrl">
+<input type="button" id="button-reset" name="button-reset" value="RESET" onClick="freset()" style="width:16%; height:75px; font-size:14px; display:inline; text-align:center; color:#fff; background-color:#8FBC8F"/>
+<input type="button" id="button-cc" name="button-cc" value="CHEST COMPRESSION" onClick="ftoggle()" style="width:65%; height:75px; font-size:14px; display:inline; text-align:center; color:#fff; background-color:#8FBC8F"/>
+<input type="button" id="button-cpr" name="button-cpr" value="CPR" onClick="foncpr()" style="width:16%; height:75px; font-size:14px; display:inline; text-align:center; color:#fff; background-color:#8FBC8F"/>
+</form>
+</head>
+<body>
+
+<form name="ccf">
+	<span style="color:#000000; font-size:152px; font-family:monospace">
+	<div id="time_cpr">cpr</div>
+	<div id="time_cc">cc</div>
+	</span>
+	<span style="color:#228B22; font-size:304px; font-family:monospace">
+	<div id="rate">rate</div>
+	</span>
+	<span style="color:#000000; font-size:24px; font-family:monospace">
+	<div id="log_interruption"></div>
+	</span>
+</form>
+
+<script type="text/javascript">
+
+	// CPRの総時間（ミリ秒）
+	var cpr;
+	// 圧迫の総時間（ミリ秒）
+	var cc;
+	// 圧迫率（％）
+	var rate;
+
+	// 現在のミリ秒
+	var time_now;
+	// CPR開始点のミリ秒（圧迫開始時にtime-cc-integratedが0なら「現在のミリ秒」を代入）
+	var time_cpr_start;
+
+	// 最近の圧迫再開点のミリ秒（圧迫開始時に「現在のミリ秒」を代入）
+	var time_cc_start;
+	// 最後の圧迫中断点までの積算圧迫ミリ秒（圧迫中断時に計算して代入）
+	var time_cc_integrated;
+	// 圧迫している（圧迫時計が動いている）か否か
+	var press;
+
+	// 最近の計測再開点のミリ秒
+	var time_cpr_start;
+	// 最後の計測中断点までの積算計測ミリ秒
+	var time_cpr_integrated;
+	// 計測している（CPR時計と圧迫率表示が動いている）か否か
+	var oncpr;
+
+	// 表示するCPRの時
+	var cpr_hour;
+	// 表示するCPRの分
+	var cpr_minu;
+	// 表示するCPRの秒
+	var cpr_sec;
+
+	// 表示する圧迫の時
+	var cc_hour;
+	// 表示する圧迫の分
+	var cc_minu;
+	// 表示する圧迫の秒
+	var cc_sec;
+
+	// ログ表示
+	var text_interruption;
+	// 中断時間（ミリ秒）
+	var time_interruption;
+	// 最後の圧迫中断点（ミリ秒）
+	var time_cc_stop;
+	// 中断回数
+	var number_interruption;
+
+window.onresize = function() {
+	ffit();
+}
+
+	fstop();
+
+function fstop() {
+	// 画面サイズ最適化
+	ffit();
+	// 初期化
+	time_now = Date.now();
+	cpr = 0;
+	cc = 0;
+	rate = 0;
+	time_interruption = 0;
+	time_cc_stop = 0;
+	text_interruption = "";
+	number_interruption = 0;
+	// CPR開始点のミリ秒
+	time_cpr_start = Date.now();
+	time_cpr_integrated = 0;
+	time_cc_integrated = 0;
+	time_cc_start = time_now;
+	// 
+	press = 0;
+	oncpr = 0;
+	frw();
+}
+
+function frw() {
+	fcpr();
+	fcc();
+	frate();
+	// console.log(time_cc_integrated)
+	// 0.1秒毎に再計算
+	setTimeout("frw()",100)
+}
+
+function ffit() {
+	// 画面サイズ最適化
+	var ww = window.innerWidth;
+	var x;
+	x = ww * 0.16;
+	document.getElementById('time_cpr').style.fontSize = Math.floor(x) + 'px';
+	x = ww * 0.16;
+	document.getElementById('time_cc').style.fontSize = Math.floor(x) + 'px';
+	x = ww * 0.35;
+	document.getElementById('rate').style.fontSize = Math.floor(x) + 'px';
+	x = ww * 0.07;
+	document.getElementById('log_interruption').style.fontSize = Math.floor(x) + 'px';
+
+	document.getElementById("button-reset").style.width = "16vw";
+	document.getElementById("button-cc").style.width = "60vw";
+	document.getElementById("button-cpr").style.width = "16vw";
+}
+
+function sec_to_hhmmss(n) {
+	var hh;
+	var mm;
+	var ss;
+	var ms;
+	hh = Math.floor(n / 3600);
+	n = n - (hh * 3600);
+	mm = Math.floor(n / 60);
+	n = n - (mm * 60);
+	ss = Math.floor(n / 1);
+	n = n - ss;
+	ms = Math.floor(n / 0.1);
+	n = (hh < 10 ? "0" + hh : hh) + ":" + (mm < 10 ? "0" + mm : mm) + ":" + (ss < 10 ? "0" + ss : ss) + "." + ms;
+	return n;
+}
+function fcpr() {
+	// CPR時間
+	time_now = Date.now();
+	cpr = (time_now - time_cpr_start) * oncpr + time_cpr_integrated;
+
+	var cpr_hhmmss = sec_to_hhmmss((cpr/1000));
+
+	var cprElement = document.getElementById("time_cpr");
+	cprElement.innerHTML = cpr_hhmmss;
+}
+function fcc() {
+	// 圧迫時間
+	time_now = Date.now();
+	cc = (time_now - time_cc_start) * press + time_cc_integrated;
+
+	var cpr_hhmmss = sec_to_hhmmss((cc/1000));
+
+	var ccElement = document.getElementById("time_cc");
+	ccElement.innerHTML = cpr_hhmmss;
+}
+function frate() {
+	// 圧迫率
+	rate = Math.floor(cc / cpr * (100));
+
+	if (isNaN(rate)){
+	rate = 0;
+	}
+	
+	var rateElement = document.getElementById("rate");
+	rateElement.innerHTML = rate;
+}
+function ftoggle() {
+	// 圧迫か中断か
+	time_now = Date.now();
+	
+	switch (press) {
+	case 0:
+			time_cc_start = time_now;
+			press = 1;
+			document.getElementById("button-cc").style.backgroundColor = '#228B22';
+
+				switch (oncpr) {
+				case 0:
+						time_cpr_start = time_now;
+						// 圧迫開始ならCPRも開始
+						document.getElementById("button-cpr").style.backgroundColor = '#228B22';
+						// CPRボタンの背景色も変更
+						oncpr = 1;
+						break;
+				case 1:
+						switch (time_cc_stop) {
+						case 0:
+								// 圧迫せずに計測開始して初回の圧迫開始
+								time_interruption = cpr;
+								flog(time_interruption);
+								// 計測開始から圧迫開始までの時間をログ１に記録
+								break;
+						default:
+								time_interruption = time_now - time_cc_stop;
+								flog(time_interruption);
+								// 中断時間を追記
+								break;
+						}
+				}
+			break;
+	case 1:
+			time_cc_integrated = cc;
+			time_cc_stop = time_now;
+			press = 0;
+			document.getElementById("button-cc").style.backgroundColor = '#8FBC8F';
+			break;
+	}
+}
+function flog(n) {
+	number_interruption = number_interruption + 1;
+	text_interruption = text_interruption + "</br>" + "[" + number_interruption + "] " + sec_to_hhmmss((n / 1000));
+	var logElement = document.getElementById("log_interruption");
+	logElement.innerHTML = text_interruption;
+	return n;
+}
+function foncpr() {
+	// 計測を停止しているか
+	time_now = Date.now();
+	
+	switch (oncpr) {
+	case 0:
+			time_cpr_start = time_now;
+
+			oncpr = 1;
+			press = 0;
+			// CPR開始しても圧迫開始とは判断しない
+			document.getElementById("button-cpr").style.backgroundColor = '#228B22';
+			// CPRボタンの背景色を変更するが圧迫ボタンは薄色のまま
+			break;
+	case 1:
+			time_cc_integrated = cc;
+			time_cpr_integrated = cpr;
+			oncpr = 0;
+			press = 0;
+			document.getElementById("button-cc").style.backgroundColor = '#8FBC8F';
+			document.getElementById("button-cpr").style.backgroundColor = '#8FBC8F';
+			// CPRボタンと圧迫ボタンの背景色を薄色に変更
+			break;
+	}
+}
+function freset() {
+	document.getElementById("button-cc").style.backgroundColor = '#8FBC8F';
+	document.getElementById("button-cpr").style.backgroundColor = '#8FBC8F';
+
+	var logElement = document.getElementById("log_interruption");
+	logElement.innerHTML = "";
+
+	fstop();
+
+}
+
+</script>
+</body>
+</html>
