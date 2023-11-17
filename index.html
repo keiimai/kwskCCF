@@ -232,7 +232,9 @@ function ftoggle() {
 						document.getElementById("button-cpr").style.backgroundColor = '#228B22';
 						// CPRボタンの背景色も変更
 						oncpr = 1;
-						
+						 // "胸骨圧迫中"の表示
+						document.getElementById("status-text").innerHTML = "胸骨圧迫中";
+
 						break;
 				case 1:
 						switch (time_cc_stop) {
@@ -279,6 +281,8 @@ function foncpr() {
 			// CPR開始しても圧迫開始とは判断しない
 			document.getElementById("button-cpr").style.backgroundColor = '#228B22';
 			// CPRボタンの背景色を変更するが圧迫ボタンは薄色のまま
+			 // "胸骨圧迫中断"の表示
+			document.getElementById("status-text").innerHTML = "胸骨圧迫中断";
 			break;
 	case 1:
 			time_cc_integrated = cc;
@@ -288,6 +292,8 @@ function foncpr() {
 			document.getElementById("button-cc").style.backgroundColor = '#8FBC8F';
 			document.getElementById("button-cpr").style.backgroundColor = '#8FBC8F';
 			// CPRボタンと圧迫ボタンの背景色を薄色に変更
+			 // "胸骨圧迫中"の表示
+			document.getElementById("status-text").innerHTML = "胸骨圧迫中";
 			break;
 	}
 }
