@@ -41,9 +41,9 @@ input[type="button"],input[type="submit"] {
 </audio>
 
 <form name="ctrl">
-<input type="button" id="button-reset" name="button-reset" value="RESET" onClick="freset()" style="width:15%; height:75px; font-size:14px; position: fixed; bottom: 0; text-align:center; color:#fff; background-color:#8FBC8F"/>
+<input type="button" id="button-reset" name="button-reset" value="RESET" onClick="freset()" style="width:50%; height:75px; font-size:14px; position: fixed; bottom: 0; text-align:center; color:#fff; background-color:#8FBC8F"/>
 <input type="button" id="button-cc" name="button-cc" value="CHEST COMPRESSION" onClick="ftoggle()" style="width:65%; height:75px; font-size:14px; display:inline; text-align:center; color:#fff; background-color:#8FBC8F"/>
-<input type="button" id="button-cpr" name="button-cpr" value="CPR" onClick="foncpr()" style="width:16%; height:75px; font-size:14px; display:inline; text-align:center; color:#fff; background-color:#8FBC8F"/>
+<input type="button" id="button-cpr" name="button-cpr" value="CPR START/STOP" onClick="foncpr()" style="width:16%; height:75px; font-size:14px; display:inline; text-align:center; color:#fff; background-color:#8FBC8F"/>
 </form>
 </head>
 <body>
@@ -232,6 +232,8 @@ function ftoggle() {
 						document.getElementById("button-cpr").style.backgroundColor = '#228B22';
 						// CPRボタンの背景色も変更
 						oncpr = 1;
+						 // "胸骨圧迫中"の表示
+						document.getElementById("status-text").innerHTML = "胸骨圧迫中";
 						break;
 				case 1:
 						switch (time_cc_stop) {
