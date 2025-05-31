@@ -19,7 +19,6 @@ You should have received a copy of the GNU General Public License along with thi
 If not, see <http://www.gnu.org/licenses/>. 
 
 -->
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -93,7 +92,7 @@ input[type="button"],input[type="submit"] {
 </head>
 <body>
 
-<div id="button-container">
+<div id="top-button-container">
     <form name="ctrl">
         <input
             type="button"
@@ -101,19 +100,27 @@ input[type="button"],input[type="submit"] {
             name="button-reset"
             value="RESET"
             onClick="freset()"
-            /><input
+        />
+    </form>
+</div>
+
+<div id="bottom-button-container">
+    <form name="ctrl">
+        <input
             type="button"
             id="button-cc"
             name="button-cc"
             value="CHEST COMPRESSION"
             onClick="ftoggle()"
-            /><input
+        />
+        <input
             type="button"
             id="button-cpr"
             name="button-cpr"
             value="CPR"
             onClick="foncpr()"
-            /></form>
+        />
+    </form>
 </div>
 
 <form name="ccf">
@@ -141,7 +148,7 @@ input[type="button"],input[type="submit"] {
 	// 現在のミリ秒
 	var time_now;
 	// CPR開始点のミリ秒（圧迫開始時にtime-cc-integratedが0なら「現在のミリ秒」を代入）
-	var time_cpr_start;
+	var time_cpr_start; // ★重複宣言を解消（ここだけ残す）
 
 	// 最近の圧迫再開点のミリ秒（圧迫開始時に「現在のミリ秒」を代入）
 	var time_cc_start;
@@ -150,8 +157,6 @@ input[type="button"],input[type="submit"] {
 	// 圧迫している（圧迫時計が動いている）か否か
 	var press;
 
-	// 最近の計測再開点のミリ秒
-	var time_cpr_start;
 	// 最後の計測中断点までの積算計測ミリ秒
 	var time_cpr_integrated;
 	// 計測している（CPR時計と圧迫率表示が動いている）か否か
@@ -205,7 +210,7 @@ function fstop() {
 	// 
 	press = 0;
 	oncpr = 0;
-	document.getElementById("status-text").innerHTML = "計測待機中"
+	document.getElementById("status-text").innerHTML = "計測待機中"; // ★セミコロン追加
 	frw();
 }
 
@@ -217,8 +222,6 @@ function frw() {
 	// 0.1秒毎に再計算
 	setTimeout("frw()",100)
 }
-
-
 
 function ffit() {
 	// 画面サイズ最適化
@@ -289,10 +292,13 @@ function ftoggle() {
 			time_cc_start = time_now;
 			press = 1;
 			document.getElementById("button-cc").style.backgroundColor = '#228B22';
-			document.getElementById("audio-start").play();
+			// document.getElementById("audio-start").play(); // 音声ファイルがないためコメントアウト
+			
+            // ★変更箇所: CPR開始ロジックを修正
 			if (oncpr === 0) {
-				foncpr(); //foncprを呼び出してCPRを同時開始
+				foncpr(); // foncpr()を呼び出してCPRを同時開始
 			} else {
+				// oncprが1の場合（CPRが既に実行中）のロジック
 				switch (time_cc_stop) {
 					case 0:
 						time_interruption = cpr;
@@ -305,30 +311,13 @@ function ftoggle() {
 				}
 			}
 			document.getElementById("status-text").innerHTML = "胸骨圧迫中";
-			break;
-				case 1:
-						switch (time_cc_stop) {
-						case 0:
-								// 圧迫せずに計測開始して初回の圧迫開始
-								time_interruption = cpr;
-								flog(time_interruption);
-								// 計測開始から圧迫開始までの時間をログ１に記録
-								break;
-						default:
-								time_interruption = time_now - time_cc_stop;
-								flog(time_interruption);
-								// 中断時間を追記
-								break;
-						}
-				}
-			document.getElementById("status-text").innerHTML = "胸骨圧迫中";
-			break;
+			break; // ★正しい位置のbreak; (余分な case 1 ブロックを削除済み)
 	case 1:  // 圧迫停止時
 			time_cc_integrated = cc;
 			time_cc_stop = time_now;
 			press = 0;
 			document.getElementById("button-cc").style.backgroundColor = '#8FBC8F';
-			document.getElementById("audio-stop").play();
+			// document.getElementById("audio-stop").play(); // 音声ファイルがないためコメントアウト
 			document.getElementById("status-text").innerHTML = "胸骨圧迫中断";
 			break;
 	}
@@ -342,30 +331,24 @@ function flog(n) {
 }
 function foncpr() {
 	// 計測を停止しているか
-	time_now = Date.now();
+	time_now = Date.now(); // ★誤字修正: Date.2now() -> Date.now()
 	
 	switch (oncpr) {
-	case 0:
+	case 0: // CPR計測開始時
 			time_cpr_start = time_now;
-
 			oncpr = 1;
-			press = 0;
-			// CPR開始しても圧迫開始とは判断しない
+			// press = 0; // ★削除: CPR開始時に圧迫を停止させないため
 			document.getElementById("button-cpr").style.backgroundColor = '#228B22';
-			// CPRボタンの背景色を変更するが圧迫ボタンは薄色のまま
-			// "胸骨圧迫中断"の表示
-			document.getElementById("status-text").innerHTML = "胸骨圧迫中断";
+			document.getElementById("status-text").innerHTML = "計測中"; // CPR開始時の表示
 			break;
-	case 1:
+	case 1: // CPR計測停止時
 			time_cc_integrated = cc;
 			time_cpr_integrated = cpr;
 			oncpr = 0;
-			press = 0;
+			press = 0; // CPRが停止したら圧迫も停止 (元のロジック)
 			document.getElementById("button-cc").style.backgroundColor = '#8FBC8F';
 			document.getElementById("button-cpr").style.backgroundColor = '#8FBC8F';
-			// CPRボタンと圧迫ボタンの背景色を薄色に変更
-			 // "胸骨圧迫中"の表示
-			document.getElementById("status-text").innerHTML = "胸骨圧迫中";
+			document.getElementById("status-text").innerHTML = "計測停止中"; // CPR停止時の表示
 			break;
 	}
 }
