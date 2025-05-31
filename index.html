@@ -25,7 +25,6 @@ If not, see <http://www.gnu.org/licenses/>.
 
 <title>川崎ECCトレーニングサイト CCF計測器 ver0.1</title>
 
-
 <style type="text/css">
 /* このスタイルブロックはボタンと送信ボタンの見た目を定義しています */
 input[type="button"],input[type="submit"] {
@@ -35,59 +34,58 @@ input[type="button"],input[type="submit"] {
 	cursor: pointer; /* カーソルをポインターにする */
 }
 /* 画面上部に固定するボタンコンテナのスタイル */
-#top-button-container { /* ★新しく追加したコンテナID */
-    position: fixed; /* 画面に対して固定配置 */
-    top: 0;          /* ★画面の上端に配置 */
-    left: 0;         /* 画面の左端から配置 */
-    width: 100%;     /* 幅を画面全体にする */
-    text-align: center; /* コンテナ内の要素を中央寄せにする */
-    padding: 10px 0; /* 上下に余白を追加 */
-    box-sizing: border-box; /* paddingを含めてwidthが100%になるようにする */
-    background-color: rgba(255, 255, 255, 0.9); /* 背景色 */
-    z-index: 1000; /* 他の要素より手前に表示 */
+#top-button-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    padding: 10px 0;
+    box-sizing: border-box;
+    background-color: rgba(255, 255, 255, 0.9);
+    z-index: 1000;
 }
 /* 画面下部に固定するボタンコンテナのスタイル */
-#bottom-button-container { /* ★新しく追加したコンテナID */
-    position: fixed; /* 画面に対して固定配置 */
-    bottom: 0;       /* ★画面の下端に配置 */
-    left: 0;         /* 画面の左端から配置 */
-    width: 100%;     /* 幅を画面全体にする */
-    text-align: center; /* コンテナ内の要素を中央寄せにする */
-    padding: 10px 0; /* 上下に余白を追加 */
-    box-sizing: border-box; /* paddingを含めてwidthが100%になるようにする */
-    background-color: rgba(255, 255, 255, 0.9); /* 背景色 */
-    z-index: 1000; /* 他の要素より手前に表示 */
+#bottom-button-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    padding: 10px 0;
+    box-sizing: border-box;
+    background-color: rgba(255, 255, 255, 0.9);
+    z-index: 1000;
 }
 /* 各コンテナ内のフォーム要素に幅を持たせて中央寄せにする（オプション） */
-#top-button-container form[name="ctrl"], /* ★セレクタを変更 */
-#bottom-button-container form[name="ctrl"] { /* ★新しく追加したセレクタ */
+#top-button-container form[name="ctrl"],
+#bottom-button-container form[name="ctrl"] {
     display: inline-block;
 }
 /* 個々のボタンのスタイルを調整 (すべてのボタンに適用される共通スタイル) */
-#top-button-container input[type="button"], /* ★セレクタを変更 */
-#bottom-button-container input[type="button"] { /* ★新しく追加したセレクタ */
+#top-button-container input[type="button"],
+#bottom-button-container input[type="button"] {
     height: 100px;
     font-size: 20px;
     color: #fff;
     background-color: #8FBC8F;
     display: inline-block;
     vertical-align: middle;
-    margin: 0 0.5%; /* ボタン同士の間に少しスペースを作る */
+    margin: 0 0.5%;
 }
 /* 各ボタンの個別の幅をここで指定 */
-#top-button-container #button-reset { /* ★セレクタを変更 */
-    width: 90%; /* ★RESETボタンは単独で表示されるので、幅を広くしました */
+#top-button-container #button-reset {
+    width: 90%;
 }
 /* 下部ボタンの個別の幅 */
-#bottom-button-container #button-cc { /* ★新しく追加したセレクタ */
+#bottom-button-container #button-cc {
     width: 60%;
 }
-#bottom-button-container #button-cpr { /* ★新しく追加したセレクタ */
-    width: 30%; /* ★CPRボタンの幅を調整しました (ccと合わせて90%程度にするため) */
+#bottom-button-container #button-cpr {
+    width: 30%;
 }
 /* このスタイルブロックはボタンと送信ボタンの見た目の定義はここまで */
 </style>
-
 
 </head>
 <body>
@@ -148,7 +146,7 @@ input[type="button"],input[type="submit"] {
 	// 現在のミリ秒
 	var time_now;
 	// CPR開始点のミリ秒（圧迫開始時にtime-cc-integratedが0なら「現在のミリ秒」を代入）
-	var time_cpr_start; // ★重複宣言を解消（ここだけ残す）
+	var time_cpr_start; // ★重複宣言を解消し、ここだけ残す
 
 	// 最近の圧迫再開点のミリ秒（圧迫開始時に「現在のミリ秒」を代入）
 	var time_cc_start;
@@ -210,7 +208,7 @@ function fstop() {
 	// 
 	press = 0;
 	oncpr = 0;
-	document.getElementById("status-text").innerHTML = "計測待機中"; // ★セミコロン追加
+    document.getElementById("status-text").innerHTML = "計測待機中"; // ステータステキストを追加
 	frw();
 }
 
@@ -235,6 +233,11 @@ function ffit() {
 	document.getElementById('rate').style.fontSize = Math.floor(x) + 'px';
 	x = ww * 0.07;
 	document.getElementById('log_interruption').style.fontSize = Math.floor(x) + 'px';
+
+	// ボタンのサイズはCSSで制御しているため、JSでの設定は削除します。
+	// document.getElementById("button-reset").style.width = "16vw";
+	// document.getElementById("button-cc").style.width = "60vw";
+	// document.getElementById("button-cpr").style.width = "16vw";
 }
 
 function sec_to_hhmmss(n) {
@@ -310,15 +313,15 @@ function ftoggle() {
 						break;
 				}
 			}
-			document.getElementById("status-text").innerHTML = "胸骨圧迫中";
-			break; // ★正しい位置のbreak; (余分な case 1 ブロックを削除済み)
+			document.getElementById("status-text").innerHTML = "胸骨圧迫中"; // ステータステキストを追加
+			break;
 	case 1:  // 圧迫停止時
 			time_cc_integrated = cc;
 			time_cc_stop = time_now;
 			press = 0;
 			document.getElementById("button-cc").style.backgroundColor = '#8FBC8F';
 			// document.getElementById("audio-stop").play(); // 音声ファイルがないためコメントアウト
-			document.getElementById("status-text").innerHTML = "胸骨圧迫中断";
+			document.getElementById("status-text").innerHTML = "胸骨圧迫中断"; // ステータステキストを追加
 			break;
 	}
 }
@@ -331,7 +334,7 @@ function flog(n) {
 }
 function foncpr() {
 	// 計測を停止しているか
-	time_now = Date.now(); // ★誤字修正: Date.2now() -> Date.now()
+	time_now = Date.now();
 	
 	switch (oncpr) {
 	case 0: // CPR計測開始時
