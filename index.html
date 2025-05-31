@@ -35,8 +35,48 @@ input[type="button"],input[type="submit"] {
 	border: 1px solid #DDD; /* 細いグレーの境界線を追加 */
 	cursor: pointer; /* カーソルをポインターにする */
 }
+
+/* ボタンを画面下部に固定するコンテナのスタイル */
+#button-container {
+    position: fixed; /* 画面に対して固定配置する */
+    bottom: 0;       /* 画面の下端に配置する */
+    left: 0;         /* 画面の左端から配置する */
+    width: 100%;     /* 幅を画面全体にする */
+    text-align: center; /* コンテナ内の要素を中央寄せにする */
+    padding: 10px 0; /* 上下に余白を追加して、ボタンと下端の間にスペースを作る */
+    box-sizing: border-box; /* paddingを含めてwidthが100%になるようにする */
+    background-color: rgba(255, 255, 255, 0.9); /* 必要であれば、背景色を半透明にするなど */
+    z-index: 1000; /* 他の要素より手前に表示されるようにする（必要に応じて） */
+}
+/* form要素にも幅を持たせて中央寄せにする（オプション） */
+#button-container form[name="ctrl"] {
+    display: inline-block; /* ボタンの幅に合わせてフォームの幅を調整 */
+}
+/* 個々のボタンのスタイルを調整 */
+#button-container input[type="button"] {
+    /* ここに、個々のボタンのwidthやdisplay（inline-blockなど）を設定します */
+    /* 元のHTMLのstyle属性にあった内容をここに移動させ、サイズを調整します */
+    height: 100px; /* ★ボタンの高さを大きくしました */
+    font-size: 20px; /* ★ボタンのフォントサイズを大きくしました */
+    color: #fff;
+    background-color: #8FBC8F;
+    display: inline-block; /* 横並びにするためにinline-blockを使う */
+    vertical-align: middle; /* ボタンの高さが異なる場合に中央揃えにする */
+    margin: 0 0.5%; /* ボタン同士の間に少しスペースを作る */
+}
+/* 各ボタンの個別の幅をここで指定 */
+#button-container #button-reset {
+    width: 15%; /* ★RESETボタンの幅を調整しました */
+}
+#button-container #button-cc {
+    width: 60%; /* ★CHEST COMPRESSIONボタンの幅を調整しました */
+}
+#button-container #button-cpr {
+    width: 20%; /* ★CPRボタンの幅を調整しました */
+}
 /* このスタイルブロックはボタンと送信ボタンの見た目の定義はここまで */
 </style>
+
 
 </head>
 <body>
@@ -82,6 +122,23 @@ input[type="button"],input[type="submit"] {
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <script type="text/javascript">
 
