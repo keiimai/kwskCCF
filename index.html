@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
+
 <!-- 
 
 reference: 
@@ -18,48 +19,69 @@ You should have received a copy of the GNU General Public License along with thi
 If not, see <http://www.gnu.org/licenses/>. 
 
 -->
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>kwsk ECC TS CCF counter</title>
+<title>川崎ECCトレーニングサイト CCF計測器 ver0.1</title>
 
-<style type="text/css">  
+
+<style type="text/css">
+/* このスタイルブロックはボタンと送信ボタンの見た目を定義しています */
 input[type="button"],input[type="submit"] {
-	-webkit-appearance: none;
-	border-radius: 5px;
-	border: 1px solid #DDD;
-	cursor: pointer;
+	-webkit-appearance: none; /* Webkitブラウザのデフォルトスタイルを無効化 */
+	border-radius: 5px; /* 角を丸くする */
+	border: 1px solid #DDD; /* 細いグレーの境界線を追加 */
+	cursor: pointer; /* カーソルをポインターにする */
 }
+/* このスタイルブロックはボタンと送信ボタンの見た目の定義はここまで */
 </style>
 
-<audio id="audio-start" preload="auto">
-<source src="http://lawngreen.github.io/CCF/bird10.mp3" type="audio/mp3">
-</audio>
-<audio id="audio-stop" preload="auto">
-<source src="http://lawngreen.github.io/CCF/corvus-macrorhynchos-cry1.mp3" type="audio/mp3">
-</audio>
-
-<form name="ctrl">
-<input type="button" id="button-reset" name="button-reset" value="RESET" onClick="freset()" style="width:150px; height:75px; font-size:14px; position: fixed; bottom: 0; text-align:center; color:#fff; background-color:#8FBC8F"/>
-<input type="button" id="button-cc" name="button-cc" value="CHEST COMPRESSION" onClick="ftoggle()" style="width:250px; height:75px; font-size:14px; display:inline; text-align:center; color:#fff; background-color:#8FBC8F"/>
-<input type="button" id="button-cpr" name="button-cpr" value="CPR TIME" onClick="foncpr()" style="width:100px; height:75px; font-size:14px; display:inline; text-align:center; color:#fff; background-color:#8FBC8F"/>
-</form>
 </head>
 <body>
 
+<div id="button-container">
+    <form name="ctrl">
+        <input
+            type="button"
+            id="button-reset"
+            name="button-reset"
+            value="RESET"
+            onClick="freset()"
+            /><input
+            type="button"
+            id="button-cc"
+            name="button-cc"
+            value="CHEST COMPRESSION"
+            onClick="ftoggle()"
+            /><input
+            type="button"
+            id="button-cpr"
+            name="button-cpr"
+            value="CPR"
+            onClick="foncpr()"
+            /></form>
+</div>
+
 <form name="ccf">
-	<span style="color:#000000; font-size:152px; font-family:monospace">
-	<div id="time_cpr">cpr</div>
-	<div id="time_cc">cc</div>
-	</span>
-	<span style="color:#228B22; font-size:304px; font-family:monospace">
-	<div id="rate">rate</div>
-	</span>
-	<span style="color:#000000; font-size:24px; font-family:monospace">
-	<div id="log_interruption"></div>
-	</span>
+    <span style="color:#000000; font-size:152px; font-family:monospace">
+    <div id="time_cpr">cpr</div>
+    <div id="time_cc">cc</div>
+    </span>
+    <span style="color:#228B22; font-size:304px; font-family:monospace">
+    <div id="rate">rate</div>
+    </span>
+    <span style="color:#000000; font-size:24px; font-family:monospace">
+    <div id="log_interruption"></div>
+    </span>
 </form>
+
+<script type="text/javascript">
+// JavaScriptコードが続く
+</script>
+</body>
+</html>
 
 <script type="text/javascript">
 
