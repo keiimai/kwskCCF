@@ -35,44 +35,56 @@ input[type="button"],input[type="submit"] {
 	border: 1px solid #DDD; /* 細いグレーの境界線を追加 */
 	cursor: pointer; /* カーソルをポインターにする */
 }
-
-/* ボタンを画面下部に固定するコンテナのスタイル */
-#button-container {
-    position: fixed; /* 画面に対して固定配置する */
-    bottom: 0;       /* 画面の下端に配置する */
-    left: 0;         /* 画面の左端から配置する */
+/* 画面上部に固定するボタンコンテナのスタイル */
+#top-button-container { /* ★新しく追加したコンテナID */
+    position: fixed; /* 画面に対して固定配置 */
+    top: 0;          /* ★画面の上端に配置 */
+    left: 0;         /* 画面の左端から配置 */
     width: 100%;     /* 幅を画面全体にする */
     text-align: center; /* コンテナ内の要素を中央寄せにする */
-    padding: 10px 0; /* 上下に余白を追加して、ボタンと下端の間にスペースを作る */
+    padding: 10px 0; /* 上下に余白を追加 */
     box-sizing: border-box; /* paddingを含めてwidthが100%になるようにする */
-    background-color: rgba(255, 255, 255, 0.9); /* 必要であれば、背景色を半透明にするなど */
-    z-index: 1000; /* 他の要素より手前に表示されるようにする（必要に応じて） */
+    background-color: rgba(255, 255, 255, 0.9); /* 背景色 */
+    z-index: 1000; /* 他の要素より手前に表示 */
 }
-/* form要素にも幅を持たせて中央寄せにする（オプション） */
-#button-container form[name="ctrl"] {
-    display: inline-block; /* ボタンの幅に合わせてフォームの幅を調整 */
+/* 画面下部に固定するボタンコンテナのスタイル */
+#bottom-button-container { /* ★新しく追加したコンテナID */
+    position: fixed; /* 画面に対して固定配置 */
+    bottom: 0;       /* ★画面の下端に配置 */
+    left: 0;         /* 画面の左端から配置 */
+    width: 100%;     /* 幅を画面全体にする */
+    text-align: center; /* コンテナ内の要素を中央寄せにする */
+    padding: 10px 0; /* 上下に余白を追加 */
+    box-sizing: border-box; /* paddingを含めてwidthが100%になるようにする */
+    background-color: rgba(255, 255, 255, 0.9); /* 背景色 */
+    z-index: 1000; /* 他の要素より手前に表示 */
 }
-/* 個々のボタンのスタイルを調整 */
-#button-container input[type="button"] {
-    /* ここに、個々のボタンのwidthやdisplay（inline-blockなど）を設定します */
-    /* 元のHTMLのstyle属性にあった内容をここに移動させ、サイズを調整します */
-    height: 100px; /* ★ボタンの高さを大きくしました */
-    font-size: 20px; /* ★ボタンのフォントサイズを大きくしました */
+/* 各コンテナ内のフォーム要素に幅を持たせて中央寄せにする（オプション） */
+#top-button-container form[name="ctrl"], /* ★セレクタを変更 */
+#bottom-button-container form[name="ctrl"] { /* ★新しく追加したセレクタ */
+    display: inline-block;
+}
+/* 個々のボタンのスタイルを調整 (すべてのボタンに適用される共通スタイル) */
+#top-button-container input[type="button"], /* ★セレクタを変更 */
+#bottom-button-container input[type="button"] { /* ★新しく追加したセレクタ */
+    height: 100px;
+    font-size: 20px;
     color: #fff;
     background-color: #8FBC8F;
-    display: inline-block; /* 横並びにするためにinline-blockを使う */
-    vertical-align: middle; /* ボタンの高さが異なる場合に中央揃えにする */
+    display: inline-block;
+    vertical-align: middle;
     margin: 0 0.5%; /* ボタン同士の間に少しスペースを作る */
 }
 /* 各ボタンの個別の幅をここで指定 */
-#button-container #button-reset {
-    width: 15%; /* ★RESETボタンの幅を調整しました */
+#top-button-container #button-reset { /* ★セレクタを変更 */
+    width: 90%; /* ★RESETボタンは単独で表示されるので、幅を広くしました */
 }
-#button-container #button-cc {
-    width: 60%; /* ★CHEST COMPRESSIONボタンの幅を調整しました */
+/* 下部ボタンの個別の幅 */
+#bottom-button-container #button-cc { /* ★新しく追加したセレクタ */
+    width: 60%;
 }
-#button-container #button-cpr {
-    width: 20%; /* ★CPRボタンの幅を調整しました */
+#bottom-button-container #button-cpr { /* ★新しく追加したセレクタ */
+    width: 30%; /* ★CPRボタンの幅を調整しました (ccと合わせて90%程度にするため) */
 }
 /* このスタイルブロックはボタンと送信ボタンの見た目の定義はここまで */
 </style>
