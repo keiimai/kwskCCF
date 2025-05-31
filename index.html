@@ -223,6 +223,7 @@ function fstop() {
 	// 
 	press = 0;
 	oncpr = 0;
+	document.getElementById("status-text").innerHTML = "計測待機中"
 	frw();
 }
 
@@ -247,10 +248,6 @@ function ffit() {
 	document.getElementById('rate').style.fontSize = Math.floor(x) + 'px';
 	x = ww * 0.07;
 	document.getElementById('log_interruption').style.fontSize = Math.floor(x) + 'px';
-
-	document.getElementById("button-reset").style.width = "16vw";
-	document.getElementById("button-cc").style.width = "60vw";
-	document.getElementById("button-cpr").style.width = "16vw";
 }
 
 function sec_to_hhmmss(n) {
@@ -299,11 +296,6 @@ function frate() {
 	var rateElement = document.getElementById("rate");
 	rateElement.innerHTML = rate;
 }
-
-
-	
-
-
 function ftoggle() {
 	// 圧迫か中断か
 	time_now = Date.now();
@@ -314,18 +306,22 @@ function ftoggle() {
 			press = 1;
 			document.getElementById("button-cc").style.backgroundColor = '#228B22';
 			document.getElementById("audio-start").play();
-
-				switch (oncpr) {
-				case 0:
-						time_cpr_start = time_now;
-						// 圧迫開始ならCPRも開始
-						document.getElementById("button-cpr").style.backgroundColor = '#228B22';
-						// CPRボタンの背景色も変更
-						oncpr = 1;
-						 // "胸骨圧迫中"の表示
-						document.getElementById("status-text").innerHTML = "胸骨圧迫中";
-
+			if (oncpr === 0) {
+				foncpr(): //foncprを呼び出してCPRを同時開始
+			} else {
+				switch (time_cc_stop) {
+					case 0:
+						time_interruption = cpr;
+						flog(time_interruption);
 						break;
+					default:
+						time_interruption = time_now - time_cc_stop;
+						flog(time_interruption);
+						break;
+				}
+			}
+			document.getElementById("status-text").innerHTML = "胸骨圧迫中";
+			break;
 				case 1:
 						switch (time_cc_stop) {
 						case 0:
