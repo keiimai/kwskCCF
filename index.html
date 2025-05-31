@@ -73,19 +73,24 @@ If not, see <http://www.gnu.org/licenses/>.
     }
 
     #top-button-container #button-reset {
-      width: 90%;
+      width: 95%;
       height: 30px;
       font-size: 18px;
     }
 
     #bottom-button-container #button-cc {
       width: 70%;
-      height: 40px;
+      height: 60px;
     }
 
     #bottom-button-container #button-cpr {
-      width: 30%;
-      height: 40px;
+      width: 28%;
+      height: 60px;
+    }
+    form[name="ccf"] span {
+      display: block;
+      transform: scale(0.6);
+      transform-origin: top left;
     }
   </style>
 </head>
@@ -130,19 +135,21 @@ If not, see <http://www.gnu.org/licenses/>.
     </form>
   </div>
 
-  <form name="ccf" style="margin-top: 60px;">
-    <span style="color:#000000; font-size:152px; font-family:monospace">
-      <div id="time_cpr">cpr</div>
-      <div id="time_cc">cc</div>
-    </span>
-    <span style="color:#228B22; font-size:304px; font-family:monospace">
-      <div id="rate">rate</div>
-    </span>
-    <div id="status-text" style="color: blue; font-size: 48px; font-weight: bold; margin-top: 20px;"></div>
-    <span style="color:#000000; font-size:24px; font-family:monospace">
-      <div id="log_interruption"></div>
-    </span>
-  </form>
+<form name="ccf" style="margin-top: 60px;">
+  <span style="color:#000000; font-family:monospace">
+    <div id="time_cpr">cpr</div>
+    <div id="time_cc">cc</div>
+  </span>
+  <div id="rate-status-wrapper" style="display: flex; align-items: center; justify-content: space-between;">
+    <div id="rate" style="color:#228B22; font-size:304px; font-family:monospace;">rate</div>
+    <div id="status-text" style="color: blue; font-size: 32px; font-weight: bold; padding-left: 20px;">計測待機中</div>
+  </div>
+  <span style="color:#000000; font-size:24px; font-family:monospace">
+    <div id="log_interruption"></div>
+  </span>
+</form>
+
+
 
   <script type="text/javascript">
     var cpr, cc, rate;
