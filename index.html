@@ -131,24 +131,6 @@ input[type="button"],input[type="submit"] {
 </form>
 
 <script type="text/javascript">
-function ffit() {
-    // 画面サイズ最適化
-    var ww = window.innerWidth;
-    var x;
-    x = ww * 0.16;
-    document.getElementById('time_cpr').style.fontSize = Math.floor(x) + 'px';
-    x = ww * 0.16;
-    document.getElementById('time_cc').style.fontSize = Math.floor(x) + 'px';
-    x = ww * 0.35;
-    document.getElementById('rate').style.fontSize = Math.floor(x) + 'px';
-    x = ww * 0.07;
-    document.getElementById('log_interruption').style.fontSize = Math.floor(x) + 'px';
-</script>
-</body>
-</html>
-
-
-<script type="text/javascript">
 	// CPRの総時間（ミリ秒）
 	var cpr;
 	// 圧迫の総時間（ミリ秒）
@@ -236,6 +218,8 @@ function frw() {
 	setTimeout("frw()",100)
 }
 
+
+
 function ffit() {
 	// 画面サイズ最適化
 	var ww = window.innerWidth;
@@ -307,7 +291,7 @@ function ftoggle() {
 			document.getElementById("button-cc").style.backgroundColor = '#228B22';
 			document.getElementById("audio-start").play();
 			if (oncpr === 0) {
-				foncpr(): //foncprを呼び出してCPRを同時開始
+				foncpr(); //foncprを呼び出してCPRを同時開始
 			} else {
 				switch (time_cc_stop) {
 					case 0:
