@@ -118,25 +118,37 @@ input[type="button"],input[type="submit"] {
 
 <form name="ccf">
     <span style="color:#000000; font-size:152px; font-family:monospace">
-    <div id="time_cpr">cpr</div>
-    <div id="time_cc">cc</div>
+        <div id="time_cpr">cpr</div>
+        <div id="time_cc">cc</div>
     </span>
     <span style="color:#228B22; font-size:304px; font-family:monospace">
-    <div id="rate">rate</div>
+        <div id="rate">rate</div>
     </span>
+    <div id="status-text" style="color: blue; font-size: 48px; font-weight: bold; margin-top: 20px;"></div>
     <span style="color:#000000; font-size:24px; font-family:monospace">
-    <div id="log_interruption"></div>
+        <div id="log_interruption"></div>
     </span>
 </form>
 
 <script type="text/javascript">
-// JavaScriptコードが続く
+function ffit() {
+    // 画面サイズ最適化
+    var ww = window.innerWidth;
+    var x;
+    x = ww * 0.16;
+    document.getElementById('time_cpr').style.fontSize = Math.floor(x) + 'px';
+    x = ww * 0.16;
+    document.getElementById('time_cc').style.fontSize = Math.floor(x) + 'px';
+    x = ww * 0.35;
+    document.getElementById('rate').style.fontSize = Math.floor(x) + 'px';
+    x = ww * 0.07;
+    document.getElementById('log_interruption').style.fontSize = Math.floor(x) + 'px';
 </script>
 </body>
 </html>
 
-<script type="text/javascript">
 
+<script type="text/javascript">
 	// CPRの総時間（ミリ秒）
 	var cpr;
 	// 圧迫の総時間（ミリ秒）
@@ -287,12 +299,17 @@ function frate() {
 	var rateElement = document.getElementById("rate");
 	rateElement.innerHTML = rate;
 }
+
+
+	
+
+
 function ftoggle() {
 	// 圧迫か中断か
 	time_now = Date.now();
 	
 	switch (press) {
-	case 0:
+	case 0: // 圧迫開始時
 			time_cc_start = time_now;
 			press = 1;
 			document.getElementById("button-cc").style.backgroundColor = '#228B22';
@@ -324,13 +341,15 @@ function ftoggle() {
 								break;
 						}
 				}
+			document.getElementById("status-text").innerHTML = "胸骨圧迫中";
 			break;
-	case 1:
+	case 1:  // 圧迫停止時
 			time_cc_integrated = cc;
 			time_cc_stop = time_now;
 			press = 0;
 			document.getElementById("button-cc").style.backgroundColor = '#8FBC8F';
 			document.getElementById("audio-stop").play();
+			document.getElementById("status-text").innerHTML = "胸骨圧迫中断";
 			break;
 	}
 }
@@ -354,7 +373,7 @@ function foncpr() {
 			// CPR開始しても圧迫開始とは判断しない
 			document.getElementById("button-cpr").style.backgroundColor = '#228B22';
 			// CPRボタンの背景色を変更するが圧迫ボタンは薄色のまま
-			 // "胸骨圧迫中断"の表示
+			// "胸骨圧迫中断"の表示
 			document.getElementById("status-text").innerHTML = "胸骨圧迫中断";
 			break;
 	case 1:
