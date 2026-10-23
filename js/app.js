@@ -5,26 +5,28 @@
 (function () {
   'use strict';
 
-  var STATUS_LABELS = {
-    idle: '計測待機中',
-    measuring: '計測中',
-    compressing: '胸骨圧迫中',
-    interrupted: '胸骨圧迫中断',
-    paused: '計測停止中'
-  };
+  var T = CCFTimer;
+  var L = CCFLabels;
+  var timer = T.createTimer();
 
-  var timer = CCFTimer.createTimer();
-  var format = CCFTimer.formatDuration;
+  // 心停止確知の直後に同じボタンを続けて押しても、圧迫開始にしない
+  var GUARD_MS = 500;
 
   var el = {
     reset: document.getElementById('button-reset'),
-    cc: document.getElementById('button-cc'),
-    cpr: document.getElementById('button-cpr'),
-    timeCpr: document.getElementById('time_cpr'),
-    timeCc: document.getElementById('time_cc'),
-    rate: document.getElementById('rate'),
-    status: document.getElementById('status-text'),
-    log: document.getElementById('log_interruption')
+    banner: document.getElementById('status-banner'),
+    statusText: document.getElementById('status-text'),
+    liveGap: document.getElementById('live-gap'),
+    ccfBlock: document.getElementById('ccf-block'),
+    ccf: document.getElementById('ccf-value'),
+    rating: document.getElementById('ccf-rating'),
+    legend: document.getElementById('legend'),
+    timeArrest: document.getElementById('time-arrest'),
+    timeCompression: document.getElementById('time-compression'),
+    summary: document.getElementById('log-summary'),
+    log: document.getElementById('log'),
+    finish: document.getElementById('button-finish'),
+    main: document.getElementById('button-main')
   };
 
   // 端末の時計（Date.now）を使う。
@@ -36,35 +38,111 @@
     return lastNow;
   }
 
-  var shownLogCount = 0;
+  var guardUntil = 0;
+  var shownLogKey = '';
 
-  function render() {
-    var snap = timer.snapshot(now());
-    setText(el.timeCpr, format(snap.measured));
-    setText(el.timeCc, format(snap.compressed));
-    setText(el.rate, String(snap.ccf));
-    setText(el.status, STATUS_LABELS[snap.status]);
-    el.cc.classList.toggle('active', snap.compressing);
-    el.cpr.classList.toggle('active', snap.measuring);
-    renderLog(snap.interruptions);
+  function isRunning(status) {
+    return status === 'pre' || status === 'compressing' || status === 'interrupted';
   }
 
-  function renderLog(interruptions) {
-    if (interruptions.length < shownLogCount) {
-      el.log.textContent = '';
-      shownLogCount = 0;
+  function seconds(ms) {
+    return T.formatSeconds(ms) + L.seconds;
+  }
+
+  function render() {
+    var t = now();
+    var snap = timer.snapshot(t);
+    var status = L.status[snap.status];
+    var gapOpen = snap.status === 'pre' || snap.status === 'interrupted';
+
+    setText(el.statusText, status.text);
+    setText(el.liveGap, gapOpen ? seconds(snap.currentGap) : '');
+    setClass(el.banner, 'banner tone-' + (gapOpen && T.isOverLimit(snap.currentGap) ? 'danger' : status.tone));
+
+    setText(el.ccf, String(snap.ccf));
+    setText(el.rating, snap.rating ? L.rating[snap.rating] : '');
+    setClass(el.ccfBlock, 'ccf' + (snap.rating ? ' rating-' + snap.rating : ''));
+
+    setText(el.timeArrest, T.formatClock(snap.measured));
+    setText(el.timeCompression, T.formatClock(snap.compressed));
+
+    renderLog(snap);
+
+    var main = L.mainButton[snap.status];
+    el.main.hidden = !main;
+    if (main) {
+      setText(el.main, main.text);
+      setClass(el.main, 'tone-' + main.tone);
     }
-    for (; shownLogCount < interruptions.length; shownLogCount++) {
-      var line = document.createElement('div');
-      line.textContent = '[' + (shownLogCount + 1) + '] ' + format(interruptions[shownLogCount]);
-      el.log.appendChild(line);
+    el.finish.hidden = !isRunning(snap.status);
+  }
+
+  // ログは追記されるだけなので、件数などが変わったときだけ作り直す
+  function renderLog(snap) {
+    var list = snap.interruptions;
+    var key = snap.status + '/' + snap.firstCompressionDelay + '/' + list.length;
+    if (key === shownLogKey) {
+      return;
     }
+    shownLogKey = key;
+
+    if (snap.status === 'idle') {
+      el.summary.textContent = '';
+    } else {
+      var longest = null;
+      list.forEach(function (e) {
+        longest = longest === null ? e.duration : Math.max(longest, e.duration);
+      });
+      el.summary.textContent = L.summary(list.length, T.INTERRUPTION_LIMIT_MS / 1000, snap.overLimitCount,
+        longest === null ? null : T.formatSeconds(longest));
+    }
+
+    el.log.textContent = '';
+    if (snap.firstCompressionDelay !== null) {
+      el.log.appendChild(logItem(L.firstCompression, snap.firstCompressionDelay, null, false));
+    } else if (snap.status === 'finished') {
+      el.log.appendChild(logItem(L.firstCompression, null, null, false));
+    }
+    list.forEach(function (e, i) {
+      el.log.appendChild(logItem('#' + (i + 1), e.duration, e.start, e.final));
+    });
+  }
+
+  // 1 行を「見出し・長さ・始まった時刻」の 3 列で作る。列の幅は CSS でそろえる。
+  // duration が null なのは、一度も胸骨圧迫せずに終了した場合だけ
+  function logItem(label, duration, start, final) {
+    var li = document.createElement('li');
+    li.className = 'log-item' + (duration !== null && T.isOverLimit(duration) ? ' over' : '');
+    li.appendChild(span('log-label', label));
+    li.appendChild(span('log-duration', duration === null ? L.noCompression : seconds(duration)));
+    var note = [];
+    if (start !== null) {
+      note.push(T.formatClock(start) + '〜');
+    }
+    if (final) {
+      note.push(L.finalTag);
+    }
+    li.appendChild(span('log-note', note.join(' ')));
+    return li;
+  }
+
+  function span(className, text) {
+    var node = document.createElement('span');
+    node.className = className;
+    node.textContent = text;
+    return node;
   }
 
   // 同じ値なら書き換えない（毎フレーム呼ぶため）
   function setText(node, text) {
     if (node.textContent !== text) {
       node.textContent = text;
+    }
+  }
+
+  function setClass(node, className) {
+    if (node.className !== className) {
+      node.className = className;
     }
   }
 
@@ -82,12 +160,12 @@
     if (!('wakeLock' in navigator)) {
       return;
     }
-    var measuring = timer.snapshot(now()).measuring;
-    if (measuring && !wakeLock && !wakeLockPending && document.visibilityState === 'visible') {
+    var running = isRunning(timer.snapshot(now()).status);
+    if (running && !wakeLock && !wakeLockPending && document.visibilityState === 'visible') {
       wakeLockPending = true;
       navigator.wakeLock.request('screen').then(function (lock) {
-        // 取得を待つ間に計測が止まっていたら、すぐ解放する
-        if (!timer.snapshot(now()).measuring) {
+        // 取得を待つ間に計測が終わっていたら、すぐ解放する
+        if (!isRunning(timer.snapshot(now()).status)) {
           lock.release();
           return;
         }
@@ -100,7 +178,7 @@
       }).then(function () {
         wakeLockPending = false;
       });
-    } else if (!measuring && wakeLock) {
+    } else if (!running && wakeLock) {
       wakeLock.release();
       wakeLock = null;
     }
@@ -111,27 +189,36 @@
     syncWakeLock();
   }
 
-  el.cc.addEventListener('click', function () {
-    timer.toggleCompression(now());
+  el.main.addEventListener('click', function () {
+    var t = now();
+    if (timer.snapshot(t).status === 'idle') {
+      timer.recognizeArrest(t);
+      guardUntil = t + GUARD_MS;
+    } else if (t >= guardUntil) {
+      timer.toggleCompression(t);
+    }
     afterAction();
   });
 
-  el.cpr.addEventListener('click', function () {
-    timer.toggleMeasuring(now());
+  // 終了は 1 回押すだけで確定する（押し間違いは、大きなボタンとの間を空けて防ぐ）
+  el.finish.addEventListener('click', function () {
+    timer.finish(now());
     afterAction();
   });
 
   el.reset.addEventListener('click', function () {
-    if (timer.snapshot(now()).status !== 'idle' &&
-        !window.confirm('計測結果を消去してリセットしますか？')) {
+    if (timer.snapshot(now()).status !== 'idle' && !window.confirm(L.resetConfirm)) {
       return;
     }
     timer.reset();
+    guardUntil = 0;
     afterAction();
   });
 
   // タブを離れると wake lock は自動で外れるので、戻ったときに取り直す
   document.addEventListener('visibilitychange', syncWakeLock);
 
+  el.legend.textContent = L.legend(T.CCF_GOOD, T.CCF_ACCEPTABLE);
+  el.finish.textContent = L.finishButton;
   loop();
 })();

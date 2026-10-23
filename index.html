@@ -27,8 +27,8 @@ If not, see <https://www.gnu.org/licenses/>.
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>川崎ECCトレーニングサイト CCF計測器 ver1.0</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>川崎ECCトレーニングサイト CCF計測器 ver2.0</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/qr.css" />
   <link rel="manifest" href="manifest.webmanifest" />
@@ -37,26 +37,40 @@ If not, see <https://www.gnu.org/licenses/>.
 </head>
 
 <body>
-  <div id="top-button-container">
-    <button type="button" id="button-reset">リセット</button>
-    <button type="button" id="button-qr">QR</button>
-  </div>
+  <div class="app">
+    <header>
+      <span class="title">CCF計測器 <small>ver2.0</small></span>
+      <div class="header-buttons">
+        <button type="button" id="button-qr">QR</button>
+        <button type="button" id="button-reset">リセット</button>
+      </div>
+    </header>
 
-  <main>
-    <div id="time_cpr">00:00:00.0</div>
-    <div id="time_cc">00:00:00.0</div>
-
-    <div id="rate-status-wrapper">
-      <div id="rate">0</div>
-      <div id="status-text">計測待機中</div>
+    <div id="status-banner" class="banner tone-neutral">
+      <span id="status-text">心停止の確知を待っています</span>
+      <span id="live-gap" class="num"></span>
     </div>
 
-    <div id="log_interruption"></div>
-  </main>
+    <div id="ccf-block" class="ccf">
+      <div><span id="ccf-value" class="num">0</span><span class="ccf-unit">%</span></div>
+      <span id="ccf-rating"></span>
+    </div>
+    <p id="legend" class="legend"></p>
 
-  <div id="bottom-button-container">
-    <button type="button" id="button-cc">胸骨圧迫時間</button>
-    <button type="button" id="button-cpr">心停止時間</button>
+    <dl class="times">
+      <div><dt>心停止時間</dt><dd id="time-arrest" class="num">0:00</dd></div>
+      <div><dt>胸骨圧迫時間</dt><dd id="time-compression" class="num">0:00</dd></div>
+    </dl>
+
+    <section class="log-area">
+      <p id="log-summary"></p>
+      <ol id="log" class="num"></ol>
+    </section>
+
+    <div class="controls">
+      <button type="button" id="button-finish" hidden>終了（ROSC・蘇生中止）</button>
+      <button type="button" id="button-main" class="tone-arrest">心停止確知</button>
+    </div>
   </div>
 
   <div id="qr-overlay" class="qr-overlay" role="dialog" aria-modal="true" aria-label="このページの QR コード" hidden>
@@ -72,6 +86,7 @@ If not, see <https://www.gnu.org/licenses/>.
   </div>
 
   <script src="js/timer.js"></script>
+  <script src="js/labels.js"></script>
   <script src="js/app.js"></script>
   <script src="js/qr.js"></script>
   <script src="js/offline.js"></script>

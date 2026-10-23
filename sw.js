@@ -11,6 +11,7 @@ var FILES = [
   'css/style.css',
   'css/qr.css',
   'js/timer.js',
+  'js/labels.js',
   'js/app.js',
   'js/qr.js',
   'js/offline.js',

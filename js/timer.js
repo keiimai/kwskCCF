@@ -5,104 +5,135 @@
 (function (root) {
   'use strict';
 
-  // 状態: idle（待機）/ measuring（計測中・圧迫前）/ compressing（圧迫中）
-  //       interrupted（圧迫中断）/ paused（計測停止中）
+  var CCF_GOOD = 80;                 // これ以上は良好
+  var CCF_ACCEPTABLE = 60;           // これ以上は許容、未満は不可
+  var INTERRUPTION_LIMIT_MS = 10000; // これを超える中断は不可
+
+  // 状態: idle（確知前）/ pre（確知後・初回圧迫前）/ compressing（圧迫中）
+  //       interrupted（圧迫中断）/ finished（終了）
   function createTimer() {
     var s;
 
     function reset() {
       s = {
         status: 'idle',
-        measuring: false,
-        compressing: false,
-        // 直近の再開より前に積算された計測時間・圧迫時間
-        measuredBefore: 0,
+        recognizedAt: 0,
+        finishedAt: 0,
+        // 直近の圧迫開始より前に積算された圧迫時間
         compressedBefore: 0,
-        measureStartedAt: 0,
         compressStartedAt: 0,
-        // 直近の圧迫終了時点の計測時間（計測開始直後は 0）
-        lastCompressionEndMeasured: 0,
+        // 圧迫していない区間が始まった時刻（心停止確知または圧迫中断）
+        gapStartedAt: 0,
+        firstCompressionDelay: null,
+        // { start: 確知からの経過, duration, final: 終了直前の区間か }
         interruptions: []
       };
     }
 
     function measured(now) {
-      return s.measuredBefore + (s.measuring ? now - s.measureStartedAt : 0);
+      if (s.status === 'idle') {
+        return 0;
+      }
+      return (s.status === 'finished' ? s.finishedAt : now) - s.recognizedAt;
     }
 
     function compressed(now) {
-      return s.compressedBefore + (s.compressing ? now - s.compressStartedAt : 0);
+      return s.compressedBefore + (s.status === 'compressing' ? now - s.compressStartedAt : 0);
     }
 
-    function startMeasuring(now) {
-      s.measuring = true;
-      s.measureStartedAt = now;
-      s.status = 'measuring';
+    function inGap() {
+      return s.status === 'pre' || s.status === 'interrupted';
     }
 
-    function startCompression(now) {
-      if (!s.measuring) {
-        // 圧迫開始なら計測も開始する
-        startMeasuring(now);
+    function recordInterruption(now, final) {
+      var duration = now - s.gapStartedAt;
+      if (duration > 0) {
+        s.interruptions.push({
+          start: s.gapStartedAt - s.recognizedAt,
+          duration: duration,
+          final: final
+        });
       }
-      // 中断時間は計測時間の差で数えるので、計測停止中の時間は含まない
-      var interruption = measured(now) - s.lastCompressionEndMeasured;
-      if (interruption > 0) {
-        s.interruptions.push(interruption);
-      }
-      s.compressing = true;
-      s.compressStartedAt = now;
-      s.status = 'compressing';
     }
 
-    function stopCompression(now) {
-      // 押した瞬間の時刻で積算する（表示更新の周期に左右されない）
-      s.compressedBefore = compressed(now);
-      s.compressing = false;
-      s.lastCompressionEndMeasured = measured(now);
-      s.status = 'interrupted';
+    function recognizeArrest(now) {
+      if (s.status !== 'idle') {
+        return false;
+      }
+      s.status = 'pre';
+      s.recognizedAt = now;
+      s.gapStartedAt = now;
+      return true;
     }
 
     function toggleCompression(now) {
-      if (s.compressing) {
-        stopCompression(now);
-      } else {
-        startCompression(now);
+      if (s.status === 'compressing') {
+        // 押した瞬間の時刻で積算する（表示更新の周期に左右されない）
+        s.compressedBefore = compressed(now);
+        s.status = 'interrupted';
+        s.gapStartedAt = now;
+        return true;
       }
+      if (s.status === 'pre') {
+        s.firstCompressionDelay = now - s.gapStartedAt;
+      } else if (s.status === 'interrupted') {
+        recordInterruption(now, false);
+      } else {
+        // 確知前と終了後は受け付けない
+        return false;
+      }
+      s.status = 'compressing';
+      s.compressStartedAt = now;
+      return true;
     }
 
-    function toggleMeasuring(now) {
-      if (!s.measuring) {
-        // 計測を再開しても圧迫開始とはみなさない
-        startMeasuring(now);
-        return;
+    function finish(now) {
+      if (s.status === 'compressing') {
+        s.compressedBefore = compressed(now);
+      } else if (s.status === 'interrupted') {
+        // 最後の圧迫中断から終了までも中断として記録する
+        recordInterruption(now, true);
+      } else if (s.status !== 'pre') {
+        return false;
       }
-      if (s.compressing) {
-        stopCompression(now);
-      }
-      s.measuredBefore = measured(now);
-      s.measuring = false;
-      s.status = 'paused';
+      s.status = 'finished';
+      s.finishedAt = now;
+      return true;
     }
 
     function snapshot(now) {
       var m = measured(now);
       var c = compressed(now);
+      var ccf = ccfPercent(c, m);
+      var overLimitCount = 0;
+      if (s.firstCompressionDelay !== null && isOverLimit(s.firstCompressionDelay)) {
+        overLimitCount++;
+      }
+      var interruptions = s.interruptions.map(function (e) {
+        if (isOverLimit(e.duration)) {
+          overLimitCount++;
+        }
+        return { start: e.start, duration: e.duration, final: e.final };
+      });
       return {
         status: s.status,
-        measuring: s.measuring,
-        compressing: s.compressing,
         measured: m,
         compressed: c,
-        ccf: ccfPercent(c, m),
-        interruptions: s.interruptions.slice()
+        ccf: ccf,
+        rating: s.status === 'idle' ? null : rateCcf(ccf),
+        firstCompressionDelay: s.firstCompressionDelay,
+        // 今まさに続いている、圧迫していない時間（初回圧迫前・中断中のみ）
+        currentGap: inGap() ? now - s.gapStartedAt : 0,
+        interruptions: interruptions,
+        overLimitCount: overLimitCount
       };
     }
 
     reset();
     return {
+      recognizeArrest: recognizeArrest,
       toggleCompression: toggleCompression,
-      toggleMeasuring: toggleMeasuring,
+      finish: finish,
       reset: reset,
       snapshot: snapshot
     };
@@ -117,15 +148,36 @@
     return Math.floor(compressedMs * 100 / measuredMs);
   }
 
-  // ミリ秒 → "HH:MM:SS.t"（0.1 秒単位で切り捨て）。整数で計算して小数の誤差を避ける
-  function formatDuration(ms) {
-    var tenths = Math.floor(Math.max(0, ms) / 100);
-    var t = tenths % 10;
-    var totalSec = Math.floor(tenths / 10);
+  // 切り捨てた整数で判定しても、80・60 の境目は元の値で判定したのと同じになる
+  function rateCcf(percent) {
+    if (percent >= CCF_GOOD) {
+      return 'good';
+    }
+    if (percent >= CCF_ACCEPTABLE) {
+      return 'acceptable';
+    }
+    return 'poor';
+  }
+
+  // 画面と同じ 0.1 秒単位（切り捨て）で比べる。10.0 秒は許容、10.1 秒から超過。
+  // ミリ秒のまま比べると「10.0秒」と表示されているのに赤くなることがあるため
+  function isOverLimit(ms) {
+    return Math.floor(ms / 100) > INTERRUPTION_LIMIT_MS / 100;
+  }
+
+  // ミリ秒 → "m:ss"（1 時間以上は "h:mm:ss"）。秒未満は切り捨て
+  function formatClock(ms) {
+    var totalSec = Math.floor(Math.max(0, ms) / 1000);
     var ss = totalSec % 60;
     var mm = Math.floor(totalSec / 60) % 60;
     var hh = Math.floor(totalSec / 3600);
-    return pad2(hh) + ':' + pad2(mm) + ':' + pad2(ss) + '.' + t;
+    return hh > 0 ? hh + ':' + pad2(mm) + ':' + pad2(ss) : mm + ':' + pad2(ss);
+  }
+
+  // ミリ秒 → 秒の数字 "12.3"（0.1 秒単位で切り捨て）。整数で計算して小数の誤差を避ける
+  function formatSeconds(ms) {
+    var tenths = Math.floor(Math.max(0, ms) / 100);
+    return Math.floor(tenths / 10) + '.' + (tenths % 10);
   }
 
   function pad2(n) {
@@ -133,9 +185,15 @@
   }
 
   var api = {
+    CCF_GOOD: CCF_GOOD,
+    CCF_ACCEPTABLE: CCF_ACCEPTABLE,
+    INTERRUPTION_LIMIT_MS: INTERRUPTION_LIMIT_MS,
     createTimer: createTimer,
     ccfPercent: ccfPercent,
-    formatDuration: formatDuration
+    rateCcf: rateCcf,
+    isOverLimit: isOverLimit,
+    formatClock: formatClock,
+    formatSeconds: formatSeconds
   };
 
   if (typeof module !== 'undefined' && module.exports) {

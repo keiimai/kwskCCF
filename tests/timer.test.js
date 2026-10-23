@@ -4,112 +4,172 @@
 (function () {
   'use strict';
 
-  var createTimer = CCFTimer.createTimer;
-  var ccfPercent = CCFTimer.ccfPercent;
-  var format = CCFTimer.formatDuration;
+  var T = CCFTimer;
+  var createTimer = T.createTimer;
 
-  test('時間表示: 0.1 秒単位で切り捨てる', function () {
-    equal(format(0), '00:00:00.0');
-    equal(format(99), '00:00:00.0');
-    equal(format(300), '00:00:00.3');
-    equal(format(1300), '00:00:01.3');
-    equal(format(59999), '00:00:59.9');
-    equal(format(3723400), '01:02:03.4');
+  test('時間表示: 分:秒（1 時間以上は 時:分:秒）、秒未満は切り捨て', function () {
+    equal(T.formatClock(0), '0:00');
+    equal(T.formatClock(59999), '0:59');
+    equal(T.formatClock(65000), '1:05');
+    equal(T.formatClock(3723400), '1:02:03');
+  });
+
+  test('秒表示: 0.1 秒単位で切り捨て、小数の誤差を出さない', function () {
+    equal(T.formatSeconds(0), '0.0');
+    equal(T.formatSeconds(300), '0.3');
+    equal(T.formatSeconds(1300), '1.3');
+    equal(T.formatSeconds(10099), '10.0');
+    equal(T.formatSeconds(65400), '65.4');
   });
 
   test('CCF: 小数の誤差で 1 少なく出ない', function () {
-    equal(ccfPercent(290, 1000), 29);
-    equal(ccfPercent(570, 1000), 57);
-    equal(ccfPercent(1000, 1000), 100);
-    equal(ccfPercent(0, 0), 0);
+    equal(T.ccfPercent(290, 1000), 29);
+    equal(T.ccfPercent(570, 1000), 57);
+    equal(T.ccfPercent(1000, 1000), 100);
+    equal(T.ccfPercent(0, 0), 0);
   });
 
-  test('心停止時間ボタンで開始し、5 秒後に圧迫開始 → 中断 5 秒を記録', function () {
+  test('CCF の判定: 80% 以上 良好、60〜79% 許容、60% 未満 不可', function () {
+    equal(T.rateCcf(100), 'good');
+    equal(T.rateCcf(80), 'good');
+    equal(T.rateCcf(79), 'acceptable');
+    equal(T.rateCcf(60), 'acceptable');
+    equal(T.rateCcf(59), 'poor');
+    equal(T.rateCcf(0), 'poor');
+  });
+
+  test('10 秒超の判定: 表示が 10.0 秒なら許容、10.1 秒から超過', function () {
+    equal(T.isOverLimit(10000), false);
+    equal(T.isOverLimit(10099), false);
+    equal(T.isOverLimit(10100), true);
+    equal(T.isOverLimit(25000), true);
+  });
+
+  test('心停止確知の前は、圧迫ボタンも終了も受け付けない', function () {
     var t = createTimer();
-    t.toggleMeasuring(0);
-    equal(t.snapshot(0).status, 'measuring');
-    t.toggleCompression(5000);
+    equal(t.toggleCompression(1000), false);
+    equal(t.finish(2000), false);
     var s = t.snapshot(5000);
-    equal(s.status, 'compressing');
-    equalList(s.interruptions, [5000]);
+    equal(s.status, 'idle');
+    equal(s.measured, 0);
+    equal(s.rating, null);
   });
 
-  test('圧迫の中断と再開: 計測時間・圧迫時間・CCF', function () {
+  test('心停止確知は 1 回だけ', function () {
     var t = createTimer();
-    t.toggleMeasuring(0);
-    t.toggleCompression(5000);   // 圧迫開始（中断 5 秒）
-    t.toggleCompression(15000);  // 圧迫中断
-    equal(t.snapshot(15000).status, 'interrupted');
-    t.toggleCompression(18000);  // 圧迫再開（中断 3 秒）
-    var s = t.snapshot(20000);
+    equal(t.recognizeArrest(0), true);
+    equal(t.recognizeArrest(3000), false);
+    equal(t.snapshot(5000).measured, 5000);
+  });
+
+  test('確知から初回圧迫までの時間を、中断とは別に記録する', function () {
+    var t = createTimer();
+    t.recognizeArrest(0);
+    var s = t.snapshot(3000);
+    equal(s.status, 'pre');
+    equal(s.currentGap, 3000);
+    t.toggleCompression(4000);
+    s = t.snapshot(4000);
+    equal(s.status, 'compressing');
+    equal(s.firstCompressionDelay, 4000);
+    equal(s.currentGap, 0);
+    equalList(s.interruptions, []);
+  });
+
+  test('圧迫の中断と再開: 時間・CCF・判定・中断の開始時刻', function () {
+    var t = createTimer();
+    t.recognizeArrest(0);
+    t.toggleCompression(4000);   // 初回圧迫（確知から 4 秒）
+    t.toggleCompression(14000);  // 圧迫中断
+    var s = t.snapshot(16500);
+    equal(s.status, 'interrupted');
+    equal(s.currentGap, 2500);
+    t.toggleCompression(17000);  // 圧迫再開（中断 3 秒）
+    s = t.snapshot(20000);
     equal(s.measured, 20000);
-    equal(s.compressed, 12000);
-    equal(s.ccf, 60);
-    equalList(s.interruptions, [5000, 3000]);
+    equal(s.compressed, 13000);
+    equal(s.ccf, 65);
+    equal(s.rating, 'acceptable');
+    equalList(s.interruptions, [{ start: 14000, duration: 3000, final: false }]);
   });
 
   test('押した瞬間の時刻で積算する（0.1 秒刻みに丸めない）', function () {
     var t = createTimer();
+    t.recognizeArrest(0);
     t.toggleCompression(0);
     t.toggleCompression(1050);
     t.toggleCompression(2030);
     t.toggleCompression(3070);
     var s = t.snapshot(4000);
     equal(s.compressed, 1050 + 1040);
-    equal(s.measured, 4000);
-    equalList(s.interruptions, [980]);
+    equal(s.interruptions[0].duration, 980);
   });
 
-  test('胸骨圧迫時間ボタンで開始すると計測も始まり、中断は記録しない', function () {
+  test('圧迫中に終了: 圧迫時間はそこで止まり、以後の操作は受け付けない', function () {
     var t = createTimer();
-    t.toggleCompression(1000);
-    var s = t.snapshot(3000);
-    equal(s.measuring, true);
-    equal(s.compressing, true);
-    equal(s.measured, 2000);
-    equal(s.compressed, 2000);
-    equalList(s.interruptions, []);
+    t.recognizeArrest(0);
+    t.toggleCompression(5000);
+    equal(t.finish(30000), true);
+    var s = t.snapshot(50000);
+    equal(s.status, 'finished');
+    equal(s.measured, 30000);
+    equal(s.compressed, 25000);
+    equal(s.ccf, 83);
+    equal(s.rating, 'good');
+    equal(t.toggleCompression(51000), false);
+    equal(t.recognizeArrest(52000), false);
+    equal(t.finish(53000), false);
+    equal(t.snapshot(60000).measured, 30000);
   });
 
-  test('圧迫中に計測停止 → 停止中の時間は数えず、圧迫ボタンで再開しても中断 0 秒は記録しない', function () {
+  test('中断中に終了: 最後の中断も「終了前」として記録する', function () {
     var t = createTimer();
-    t.toggleCompression(0);
-    t.toggleMeasuring(10000);
-    var s = t.snapshot(20000);
-    equal(s.status, 'paused');
-    equal(s.compressing, false);
-    equal(s.measured, 10000);
-    equal(s.compressed, 10000);
+    t.recognizeArrest(0);
+    t.toggleCompression(2000);
     t.toggleCompression(20000);
-    s = t.snapshot(25000);
-    equal(s.measured, 15000);
-    equal(s.compressed, 15000);
-    equalList(s.interruptions, []);
+    t.finish(26000);
+    var s = t.snapshot(30000);
+    equal(s.measured, 26000);
+    equal(s.compressed, 18000);
+    equalList(s.interruptions, [{ start: 20000, duration: 6000, final: true }]);
   });
 
-  test('計測停止をはさんだ中断は、停止中の時間を含めない', function () {
+  test('一度も圧迫せずに終了: 初回圧迫までは記録なし、CCF 0%', function () {
     var t = createTimer();
-    t.toggleCompression(0);
-    t.toggleCompression(4000);   // 圧迫中断
-    t.toggleMeasuring(6000);     // 計測停止（ここまでの中断 2 秒）
-    t.toggleMeasuring(30000);    // 計測再開
-    t.toggleCompression(31000);  // 圧迫再開（中断 2 + 1 = 3 秒）
-    var s = t.snapshot(31000);
-    equal(s.measured, 7000);
-    equalList(s.interruptions, [3000]);
+    t.recognizeArrest(0);
+    t.finish(8000);
+    var s = t.snapshot(9000);
+    equal(s.firstCompressionDelay, null);
+    equalList(s.interruptions, []);
+    equal(s.ccf, 0);
+    equal(s.rating, 'poor');
+  });
+
+  test('10 秒超の件数: 初回圧迫までと各中断を数える', function () {
+    var t = createTimer();
+    t.recognizeArrest(0);
+    t.toggleCompression(12000);  // 初回圧迫まで 12 秒（超過）
+    t.toggleCompression(20000);
+    t.toggleCompression(30000);  // 中断 10.0 秒（許容）
+    t.toggleCompression(40000);
+    t.toggleCompression(55000);  // 中断 15 秒（超過）
+    var s = t.snapshot(60000);
+    equal(s.overLimitCount, 2);
+    equal(s.interruptions.length, 2);
   });
 
   test('リセットで最初の状態に戻る', function () {
     var t = createTimer();
-    t.toggleMeasuring(0);
+    t.recognizeArrest(0);
     t.toggleCompression(2000);
+    t.finish(5000);
     t.reset();
     var s = t.snapshot(9000);
     equal(s.status, 'idle');
-    equal(s.measuring, false);
     equal(s.measured, 0);
     equal(s.compressed, 0);
-    equal(s.ccf, 0);
+    equal(s.firstCompressionDelay, null);
     equalList(s.interruptions, []);
+    equal(t.recognizeArrest(9000), true);
   });
 })();
