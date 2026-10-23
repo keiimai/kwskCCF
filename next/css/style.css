@@ -15,12 +15,12 @@
   --good-bg: #e3f4e6;
   --good-fill: #228b22;
 
-  --acceptable: #8a5a00;  /* 許容・初回圧迫前・中断中 */
+  --acceptable: #8a5a00;  /* 許容・初回圧迫前・中断中・除細動前 */
   --acceptable-bg: #fff1c2;
   --warning-fill: #f2b705;
   --on-warning: #2b1d00;
 
-  --poor: #b71c1c;        /* 不可・10秒超の中断 */
+  --poor: #b71c1c;        /* 不可・10秒超の中断・1分超の除細動 */
   --poor-bg: #fde7e7;
   --danger-fill: #c62828;
 
@@ -216,6 +216,12 @@ header {
   text-align: right;
 }
 
+.log-item.good {
+  background-color: var(--good-bg);
+  color: var(--good);
+  font-weight: bold;
+}
+
 .log-item.over {
   background-color: var(--poor-bg);
   color: var(--poor);
@@ -233,7 +239,8 @@ header {
 }
 
 /* 下のボタン。一番押す胸骨圧迫ボタンを一番大きく、親指の届く位置に置く。
-   終了ボタンは 1 回押すと終了するので、押し間違えないよう胸骨圧迫ボタンとの間を空ける */
+   終了ボタンは 1 回押すと終了するので、押し間違えないよう胸骨圧迫ボタンとの間を空ける。
+   初回除細動ボタンは胸骨圧迫ボタンの右に並べ、押すと消える */
 .controls {
   display: flex;
   flex-direction: column;
@@ -248,7 +255,13 @@ header {
   border: 1px solid #bbb;
 }
 
+.main-row {
+  display: flex;
+  gap: 12px;
+}
+
 #button-main {
+  flex: 1;
   height: clamp(88px, 16vh, 140px);
   font-size: clamp(22px, 7vw, 32px);
   font-weight: bold;
@@ -260,3 +273,18 @@ header {
 #button-main.tone-arrest { background-color: var(--danger-fill); }
 #button-main.tone-start { background-color: var(--start-fill); }
 #button-main.tone-stop { background-color: var(--good-fill); }
+
+#button-defib {
+  width: 34%;
+  font-size: clamp(16px, 4.8vw, 22px);
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+}
+
+#button-defib span {
+  display: block;
+}
+
+#button-defib.tone-defib { background-color: var(--warning-fill); color: var(--on-warning); }
+#button-defib.tone-late { background-color: var(--danger-fill); color: #fff; }
