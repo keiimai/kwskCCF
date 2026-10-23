@@ -51,7 +51,7 @@
     equal(T.isDefibrillationLate(60100), true);
   });
 
-  test('心停止確知の前は、圧迫ボタンも終了も受け付けない', function () {
+  test('心停止認識の前は、圧迫ボタンも終了も受け付けない', function () {
     var t = createTimer();
     equal(t.toggleCompression(1000), false);
     equal(t.finish(2000), false);
@@ -61,14 +61,14 @@
     equal(s.rating, null);
   });
 
-  test('心停止確知は 1 回だけ', function () {
+  test('心停止認識は 1 回だけ', function () {
     var t = createTimer();
     equal(t.recognizeArrest(0), true);
     equal(t.recognizeArrest(3000), false);
     equal(t.snapshot(5000).measured, 5000);
   });
 
-  test('確知から初回圧迫までの時間を、中断とは別に記録する', function () {
+  test('認識から初回圧迫までの時間を、中断とは別に記録する', function () {
     var t = createTimer();
     t.recognizeArrest(0);
     var s = t.snapshot(3000);
@@ -85,7 +85,7 @@
   test('圧迫の中断と再開: 時間・CCF・判定・中断の開始時刻', function () {
     var t = createTimer();
     t.recognizeArrest(0);
-    t.toggleCompression(4000);   // 初回圧迫（確知から 4 秒）
+    t.toggleCompression(4000);   // 初回圧迫（認識から 4 秒）
     t.toggleCompression(14000);  // 圧迫中断
     var s = t.snapshot(16500);
     equal(s.status, 'interrupted');
@@ -164,9 +164,9 @@
     equal(s.interruptions.length, 2);
   });
 
-  test('初回除細動: 確知からの時間を 1 回だけ記録し、圧迫の状態は変えない', function () {
+  test('初回除細動: 認識からの時間を 1 回だけ記録し、圧迫の状態は変えない', function () {
     var t = createTimer();
-    equal(t.recordDefibrillation(1000), false);  // 確知前は受け付けない
+    equal(t.recordDefibrillation(1000), false);  // 認識前は受け付けない
     t.recognizeArrest(2000);
     t.toggleCompression(5000);
     t.toggleCompression(40000);

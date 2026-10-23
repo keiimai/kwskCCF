@@ -9,7 +9,7 @@
   var L = CCFLabels;
   var timer = T.createTimer();
 
-  // 心停止確知と初回除細動の直後は、ボタンの幅が変わる。
+  // 心停止認識と初回除細動の直後は、ボタンの幅が変わる。
   // 続けて押しても、隣のボタンや次の操作として受け付けない
   var GUARD_MS = 500;
 
@@ -80,7 +80,7 @@
     }
     el.finish.hidden = !isRunning(snap.status);
 
-    // 初回除細動ボタンは、確知から押すまでの間だけ出す。経過時間は心停止時間と同じ
+    // 初回除細動ボタンは、認識から押すまでの間だけ出す。経過時間は心停止時間と同じ
     el.defib.hidden = !isRunning(snap.status) || snap.firstDefibrillationDelay !== null;
     if (!el.defib.hidden) {
       setText(el.defibElapsed, T.formatClock(snap.measured));
