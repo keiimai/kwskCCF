@@ -5,9 +5,10 @@
 (function (root) {
   'use strict';
 
-  var CCF_GOOD = 80;                 // これ以上は良好
-  var CCF_ACCEPTABLE = 60;           // これ以上は許容、未満は不可
-  var INTERRUPTION_LIMIT_MS = 10000; // これを超える中断は不可
+  var CCF_GOOD = 80;                   // これ以上は良好
+  var CCF_ACCEPTABLE = 60;             // これ以上は許容、未満は不可
+  var INTERRUPTION_LIMIT_MS = 10000;   // これを超える中断は不可
+  var DEFIBRILLATION_LIMIT_MS = 60000; // これを超える初回除細動は遅すぎる
 
   // 状態: idle（確知前）/ pre（確知後・初回圧迫前）/ compressing（圧迫中）
   //       interrupted（圧迫中断）/ finished（終了）
@@ -25,6 +26,7 @@
         // 圧迫していない区間が始まった時刻（心停止確知または圧迫中断）
         gapStartedAt: 0,
         firstCompressionDelay: null,
+        firstDefibrillationDelay: null,
         // { start: 確知からの経過, duration, final: 終了直前の区間か }
         interruptions: []
       };
@@ -87,6 +89,15 @@
       return true;
     }
 
+    // 初回除細動は 1 回だけ記録する。確知前と終了後は受け付けない
+    function recordDefibrillation(now) {
+      if (s.status === 'idle' || s.status === 'finished' || s.firstDefibrillationDelay !== null) {
+        return false;
+      }
+      s.firstDefibrillationDelay = now - s.recognizedAt;
+      return true;
+    }
+
     function finish(now) {
       if (s.status === 'compressing') {
         s.compressedBefore = compressed(now);
@@ -122,6 +133,7 @@
         ccf: ccf,
         rating: s.status === 'idle' ? null : rateCcf(ccf),
         firstCompressionDelay: s.firstCompressionDelay,
+        firstDefibrillationDelay: s.firstDefibrillationDelay,
         // 今まさに続いている、圧迫していない時間（初回圧迫前・中断中のみ）
         currentGap: inGap() ? now - s.gapStartedAt : 0,
         interruptions: interruptions,
@@ -133,6 +145,7 @@
     return {
       recognizeArrest: recognizeArrest,
       toggleCompression: toggleCompression,
+      recordDefibrillation: recordDefibrillation,
       finish: finish,
       reset: reset,
       snapshot: snapshot
@@ -161,8 +174,17 @@
 
   // 画面と同じ 0.1 秒単位（切り捨て）で比べる。10.0 秒は許容、10.1 秒から超過。
   // ミリ秒のまま比べると「10.0秒」と表示されているのに赤くなることがあるため
+  function exceeds(ms, limitMs) {
+    return Math.floor(ms / 100) > limitMs / 100;
+  }
+
   function isOverLimit(ms) {
-    return Math.floor(ms / 100) > INTERRUPTION_LIMIT_MS / 100;
+    return exceeds(ms, INTERRUPTION_LIMIT_MS);
+  }
+
+  // 60.0 秒までは良好、60.1 秒から遅すぎる
+  function isDefibrillationLate(ms) {
+    return exceeds(ms, DEFIBRILLATION_LIMIT_MS);
   }
 
   // ミリ秒 → "m:ss"（1 時間以上は "h:mm:ss"）。秒未満は切り捨て
@@ -188,10 +210,12 @@
     CCF_GOOD: CCF_GOOD,
     CCF_ACCEPTABLE: CCF_ACCEPTABLE,
     INTERRUPTION_LIMIT_MS: INTERRUPTION_LIMIT_MS,
+    DEFIBRILLATION_LIMIT_MS: DEFIBRILLATION_LIMIT_MS,
     createTimer: createTimer,
     ccfPercent: ccfPercent,
     rateCcf: rateCcf,
     isOverLimit: isOverLimit,
+    isDefibrillationLate: isDefibrillationLate,
     formatClock: formatClock,
     formatSeconds: formatSeconds
   };

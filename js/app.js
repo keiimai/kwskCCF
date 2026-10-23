@@ -9,7 +9,8 @@
   var L = CCFLabels;
   var timer = T.createTimer();
 
-  // 心停止確知の直後に同じボタンを続けて押しても、圧迫開始にしない
+  // 心停止確知と初回除細動の直後は、ボタンの幅が変わる。
+  // 続けて押しても、隣のボタンや次の操作として受け付けない
   var GUARD_MS = 500;
 
   var el = {
@@ -26,7 +27,10 @@
     summary: document.getElementById('log-summary'),
     log: document.getElementById('log'),
     finish: document.getElementById('button-finish'),
-    main: document.getElementById('button-main')
+    main: document.getElementById('button-main'),
+    defib: document.getElementById('button-defib'),
+    defibLabel: document.getElementById('defib-label'),
+    defibElapsed: document.getElementById('defib-elapsed')
   };
 
   // 端末の時計（Date.now）を使う。
@@ -75,12 +79,19 @@
       setClass(el.main, 'tone-' + main.tone);
     }
     el.finish.hidden = !isRunning(snap.status);
+
+    // 初回除細動ボタンは、確知から押すまでの間だけ出す。経過時間は心停止時間と同じ
+    el.defib.hidden = !isRunning(snap.status) || snap.firstDefibrillationDelay !== null;
+    if (!el.defib.hidden) {
+      setText(el.defibElapsed, T.formatClock(snap.measured));
+      setClass(el.defib, T.isDefibrillationLate(snap.measured) ? 'tone-late' : 'tone-defib');
+    }
   }
 
   // ログは追記されるだけなので、件数などが変わったときだけ作り直す
   function renderLog(snap) {
     var list = snap.interruptions;
-    var key = snap.status + '/' + snap.firstCompressionDelay + '/' + list.length;
+    var key = snap.status + '/' + snap.firstCompressionDelay + '/' + snap.firstDefibrillationDelay + '/' + list.length;
     if (key === shownLogKey) {
       return;
     }
@@ -98,31 +109,31 @@
     }
 
     el.log.textContent = '';
-    if (snap.firstCompressionDelay !== null) {
-      el.log.appendChild(logItem(L.firstCompression, snap.firstCompressionDelay, null, false));
+    var first = snap.firstCompressionDelay;
+    if (first !== null) {
+      el.log.appendChild(logItem(T.isOverLimit(first) ? 'over' : '', L.firstCompression, seconds(first), ''));
     } else if (snap.status === 'finished') {
-      el.log.appendChild(logItem(L.firstCompression, null, null, false));
+      el.log.appendChild(logItem('', L.firstCompression, L.noCompression, ''));
+    }
+    var defib = snap.firstDefibrillationDelay;
+    if (defib !== null) {
+      el.log.appendChild(logItem(T.isDefibrillationLate(defib) ? 'over' : 'good', L.firstDefibrillation, seconds(defib), ''));
+    } else if (snap.status === 'finished') {
+      el.log.appendChild(logItem('', L.firstDefibrillation, L.noDefibrillation, ''));
     }
     list.forEach(function (e, i) {
-      el.log.appendChild(logItem('#' + (i + 1), e.duration, e.start, e.final));
+      var note = T.formatClock(e.start) + '〜' + (e.final ? ' ' + L.finalTag : '');
+      el.log.appendChild(logItem(T.isOverLimit(e.duration) ? 'over' : '', '#' + (i + 1), seconds(e.duration), note));
     });
   }
 
-  // 1 行を「見出し・長さ・始まった時刻」の 3 列で作る。列の幅は CSS でそろえる。
-  // duration が null なのは、一度も胸骨圧迫せずに終了した場合だけ
-  function logItem(label, duration, start, final) {
+  // 1 行を「見出し・長さ・始まった時刻」の 3 列で作る。列の幅は CSS でそろえる
+  function logItem(tone, label, value, note) {
     var li = document.createElement('li');
-    li.className = 'log-item' + (duration !== null && T.isOverLimit(duration) ? ' over' : '');
+    li.className = 'log-item' + (tone ? ' ' + tone : '');
     li.appendChild(span('log-label', label));
-    li.appendChild(span('log-duration', duration === null ? L.noCompression : seconds(duration)));
-    var note = [];
-    if (start !== null) {
-      note.push(T.formatClock(start) + '〜');
-    }
-    if (final) {
-      note.push(L.finalTag);
-    }
-    li.appendChild(span('log-note', note.join(' ')));
+    li.appendChild(span('log-duration', value));
+    li.appendChild(span('log-note', note));
     return li;
   }
 
@@ -200,6 +211,14 @@
     afterAction();
   });
 
+  el.defib.addEventListener('click', function () {
+    var t = now();
+    if (t >= guardUntil && timer.recordDefibrillation(t)) {
+      guardUntil = t + GUARD_MS;
+    }
+    afterAction();
+  });
+
   // 終了は 1 回押すだけで確定する（押し間違いは、大きなボタンとの間を空けて防ぐ）
   el.finish.addEventListener('click', function () {
     timer.finish(now());
@@ -220,5 +239,6 @@
 
   el.legend.textContent = L.legend(T.CCF_GOOD, T.CCF_ACCEPTABLE);
   el.finish.textContent = L.finishButton;
+  el.defibLabel.textContent = L.defibButton;
   loop();
 })();

@@ -45,6 +45,12 @@
     equal(T.isOverLimit(25000), true);
   });
 
+  test('初回除細動の判定: 表示が 60.0 秒なら良好、60.1 秒から遅すぎる', function () {
+    equal(T.isDefibrillationLate(60000), false);
+    equal(T.isDefibrillationLate(60099), false);
+    equal(T.isDefibrillationLate(60100), true);
+  });
+
   test('心停止確知の前は、圧迫ボタンも終了も受け付けない', function () {
     var t = createTimer();
     equal(t.toggleCompression(1000), false);
@@ -158,10 +164,37 @@
     equal(s.interruptions.length, 2);
   });
 
+  test('初回除細動: 確知からの時間を 1 回だけ記録し、圧迫の状態は変えない', function () {
+    var t = createTimer();
+    equal(t.recordDefibrillation(1000), false);  // 確知前は受け付けない
+    t.recognizeArrest(2000);
+    t.toggleCompression(5000);
+    t.toggleCompression(40000);
+    equal(t.recordDefibrillation(54300), true);
+    equal(t.recordDefibrillation(70000), false); // 2 回目は受け付けない
+    var s = t.snapshot(60000);
+    equal(s.firstDefibrillationDelay, 52300);
+    equal(s.status, 'interrupted');
+    equal(s.compressed, 35000);
+  });
+
+  test('初回除細動: 初回圧迫の前でも押せる。終了後は受け付けない', function () {
+    var t = createTimer();
+    t.recognizeArrest(0);
+    equal(t.recordDefibrillation(3000), true);
+    equal(t.snapshot(4000).firstDefibrillationDelay, 3000);
+    var u = createTimer();
+    u.recognizeArrest(0);
+    u.finish(5000);
+    equal(u.recordDefibrillation(6000), false);
+    equal(u.snapshot(7000).firstDefibrillationDelay, null);
+  });
+
   test('リセットで最初の状態に戻る', function () {
     var t = createTimer();
     t.recognizeArrest(0);
     t.toggleCompression(2000);
+    t.recordDefibrillation(3000);
     t.finish(5000);
     t.reset();
     var s = t.snapshot(9000);
@@ -169,6 +202,7 @@
     equal(s.measured, 0);
     equal(s.compressed, 0);
     equal(s.firstCompressionDelay, null);
+    equal(s.firstDefibrillationDelay, null);
     equalList(s.interruptions, []);
     equal(t.recognizeArrest(9000), true);
   });

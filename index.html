@@ -7,7 +7,7 @@ Copyright 2016 Takeshi KODAKA
 kodaka@tokyo-med.ac.jp
 
 Copyright 2023-2026 keiimai (https://github.com/keiimai)
-Modified from the original. Last modified: 2026-10-23.
+Modified from the original. Last modified: 2026-10-24.
 
 This program is free software:
 you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -69,7 +69,10 @@ If not, see <https://www.gnu.org/licenses/>.
 
     <div class="controls">
       <button type="button" id="button-finish" hidden>終了（ROSC・蘇生中止）</button>
-      <button type="button" id="button-main" class="tone-arrest">心停止確知</button>
+      <div class="main-row">
+        <button type="button" id="button-main" class="tone-arrest">心停止確知</button>
+        <button type="button" id="button-defib" hidden><span id="defib-label">初回除細動</span><span id="defib-elapsed" class="num"></span></button>
+      </div>
     </div>
   </div>
 

@@ -24,6 +24,7 @@
     },
 
     finishButton: '終了（ROSC・蘇生中止）',
+    defibButton: '初回除細動',
     resetConfirm: '計測結果を消去してリセットしますか？',
 
     rating: { good: '良好', acceptable: '許容', poor: '不可' },
@@ -36,6 +37,8 @@
     seconds: '秒',
     firstCompression: '初回胸骨圧迫まで',
     noCompression: '胸骨圧迫なし',
+    firstDefibrillation: '初回除細動まで',
+    noDefibrillation: '除細動なし',
     finalTag: '終了前',
 
     summary: function (count, limitSeconds, overCount, longest) {
