@@ -10,7 +10,7 @@
   var INTERRUPTION_LIMIT_MS = 10000;   // これを超える中断は不可
   var DEFIBRILLATION_LIMIT_MS = 60000; // これを超える初回除細動は遅すぎる
 
-  // 状態: idle（確知前）/ pre（確知後・初回圧迫前）/ compressing（圧迫中）
+  // 状態: idle（認識前）/ pre（認識後・初回圧迫前）/ compressing（圧迫中）
   //       interrupted（圧迫中断）/ finished（終了）
   function createTimer() {
     var s;
@@ -23,11 +23,11 @@
         // 直近の圧迫開始より前に積算された圧迫時間
         compressedBefore: 0,
         compressStartedAt: 0,
-        // 圧迫していない区間が始まった時刻（心停止確知または圧迫中断）
+        // 圧迫していない区間が始まった時刻（心停止認識または圧迫中断）
         gapStartedAt: 0,
         firstCompressionDelay: null,
         firstDefibrillationDelay: null,
-        // { start: 確知からの経過, duration, final: 終了直前の区間か }
+        // { start: 認識からの経過, duration, final: 終了直前の区間か }
         interruptions: []
       };
     }
@@ -81,7 +81,7 @@
       } else if (s.status === 'interrupted') {
         recordInterruption(now, false);
       } else {
-        // 確知前と終了後は受け付けない
+        // 認識前と終了後は受け付けない
         return false;
       }
       s.status = 'compressing';
@@ -89,7 +89,7 @@
       return true;
     }
 
-    // 初回除細動は 1 回だけ記録する。確知前と終了後は受け付けない
+    // 初回除細動は 1 回だけ記録する。認識前と終了後は受け付けない
     function recordDefibrillation(now) {
       if (s.status === 'idle' || s.status === 'finished' || s.firstDefibrillationDelay !== null) {
         return false;
