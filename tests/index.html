@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later / Copyright 2023-2026 keiimai -->
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CCF計測器 テスト</title>
+  <style>
+    body { font-family: sans-serif; margin: 16px; }
+    .pass { color: #228B22; }
+    .fail { color: #c00; }
+    pre { margin: 4px 0 12px 1.5em; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1 id="summary">テスト実行中…</h1>
+  <ul id="results"></ul>
+
+  <script src="../js/timer.js"></script>
+  <script>
+    // 最小限のテスト用関数。ライブラリを入れずにブラウザだけで動かす
+    var results = [];
+
+    function test(name, fn) {
+      try {
+        fn();
+        results.push({ name: name, ok: true });
+      } catch (e) {
+        results.push({ name: name, ok: false, message: e.message });
+      }
+    }
+
+    function equal(actual, expected) {
+      if (actual !== expected) {
+        throw new Error('期待値 ' + JSON.stringify(expected) + ' / 実際 ' + JSON.stringify(actual));
+      }
+    }
+
+    function equalList(actual, expected) {
+      equal(JSON.stringify(actual), JSON.stringify(expected));
+    }
+  </script>
+  <script src="timer.test.js"></script>
+  <script>
+    var failed = results.filter(function (r) { return !r.ok; }).length;
+    var list = document.getElementById('results');
+    results.forEach(function (r) {
+      var li = document.createElement('li');
+      li.className = r.ok ? 'pass' : 'fail';
+      li.textContent = (r.ok ? '✓ ' : '✗ ') + r.name;
+      list.appendChild(li);
+      if (!r.ok) {
+        var pre = document.createElement('pre');
+        pre.textContent = r.message;
+        li.appendChild(pre);
+      }
+    });
+    var summary = document.getElementById('summary');
+    summary.textContent = failed === 0
+      ? 'すべて成功（' + results.length + ' 件）'
+      : results.length + ' 件中 ' + failed + ' 件失敗';
+    summary.className = failed === 0 ? 'pass' : 'fail';
+  </script>
+</body>
+</html>
