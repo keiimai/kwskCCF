@@ -1,0 +1,262 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ * Copyright 2016 Takeshi KODAKA (original: CCF 1.3.1)
+ * Copyright 2023-2026 keiimai (modifications)
+ */
+
+/* 色。js/labels.js の tone と対応する */
+:root {
+  --text: #111;
+  --muted: #555;
+  --line: #ddd;
+  --neutral: #e6e6e6;
+
+  --good: #1e7b34;        /* 良好・圧迫中 */
+  --good-bg: #e3f4e6;
+  --good-fill: #228b22;
+
+  --acceptable: #8a5a00;  /* 許容・初回圧迫前・中断中 */
+  --acceptable-bg: #fff1c2;
+  --warning-fill: #f2b705;
+  --on-warning: #2b1d00;
+
+  --poor: #b71c1c;        /* 不可・10秒超の中断 */
+  --poor-bg: #fde7e7;
+  --danger-fill: #c62828;
+
+  --start-fill: #2f3b45;  /* 圧迫開始ボタン */
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: #fff;
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+}
+
+/* 画面の高さに収め、ボタンは常に一番下に置く。ログだけがスクロールする */
+.app {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100vh;
+  height: 100dvh;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 8px 12px calc(12px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+button {
+  -webkit-appearance: none;
+  appearance: none;
+  font-family: inherit;
+  border-radius: 8px;
+  cursor: pointer;
+  /* 連打したときにダブルタップで拡大されたり文字が選択されたりしないように */
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button[hidden] {
+  display: none;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.header-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+#button-qr,
+#button-reset {
+  font-size: 14px;
+  padding: 4px 12px;
+  background-color: #fff;
+  color: var(--muted);
+  border: 1px solid #bbb;
+}
+
+.banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: clamp(18px, 5.5vw, 28px);
+  font-weight: bold;
+}
+
+.banner.tone-neutral { background-color: var(--neutral); color: var(--text); }
+.banner.tone-warning { background-color: var(--warning-fill); color: var(--on-warning); }
+.banner.tone-good { background-color: var(--good-fill); color: #fff; }
+.banner.tone-danger { background-color: var(--danger-fill); color: #fff; }
+
+.ccf {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-weight: bold;
+}
+
+#ccf-value {
+  font-size: clamp(64px, 26vw, 160px);
+  line-height: 1;
+}
+
+.ccf-unit {
+  font-size: clamp(24px, 8vw, 56px);
+}
+
+#ccf-rating {
+  font-size: clamp(18px, 5.5vw, 30px);
+  padding: 4px 12px;
+  border-radius: 8px;
+}
+
+#ccf-rating:empty {
+  display: none;
+}
+
+.rating-good { color: var(--good); }
+.rating-good #ccf-rating { background-color: var(--good-bg); }
+.rating-acceptable { color: var(--acceptable); }
+.rating-acceptable #ccf-rating { background-color: var(--acceptable-bg); }
+.rating-poor { color: var(--poor); }
+.rating-poor #ccf-rating { background-color: var(--poor-bg); }
+
+.legend {
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: pre-line;
+}
+
+.times {
+  margin: 0;
+  padding: 4px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.times div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.times dt {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.times dd {
+  margin: 0;
+  font-size: clamp(24px, 7vw, 40px);
+  font-weight: bold;
+}
+
+.log-area {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+#log-summary {
+  margin: 0 0 4px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+#log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* 1 行 = 見出し・長さ・始まった時刻。列の幅をそろえて、上から順に読めるようにする */
+.log-item {
+  display: grid;
+  grid-template-columns: 9em 6.5em 1fr;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 15px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background-color: #f3f3f3;
+}
+
+.log-duration {
+  text-align: right;
+}
+
+.log-item.over {
+  background-color: var(--poor-bg);
+  color: var(--poor);
+  font-weight: bold;
+}
+
+.log-note {
+  font-size: 12px;
+  font-weight: normal;
+  color: var(--muted);
+}
+
+.log-item.over .log-note {
+  color: inherit;
+}
+
+/* 下のボタン。一番押す胸骨圧迫ボタンを一番大きく、親指の届く位置に置く。
+   終了ボタンは 1 回押すと終了するので、押し間違えないよう胸骨圧迫ボタンとの間を空ける */
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+#button-finish {
+  height: 44px;
+  font-size: 16px;
+  background-color: #fff;
+  color: var(--text);
+  border: 1px solid #bbb;
+}
+
+#button-main {
+  height: clamp(88px, 16vh, 140px);
+  font-size: clamp(22px, 7vw, 32px);
+  font-weight: bold;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+}
+
+#button-main.tone-arrest { background-color: var(--danger-fill); }
+#button-main.tone-start { background-color: var(--start-fill); }
+#button-main.tone-stop { background-color: var(--good-fill); }

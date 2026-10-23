@@ -7,6 +7,7 @@ CCF は chest compression fraction（胸骨圧迫比率）の略です。
 ブラウザだけで動き、インストールは要りません。
 
 - 公開ページ（ver1.0）：<https://keiimai.github.io/kwskCCF/>
+- 試験版（ver2.0）：<https://keiimai.github.io/kwskCCF/next/>
 
 > 教育・訓練用のツールです。
 >
