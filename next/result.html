@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later / Copyright 2023-2026 keiimai -->
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>川崎ECCトレーニングサイト CCF計測結果 ver2.0（試験版）</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/result.css" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png" />
+  <meta name="theme-color" content="#228b22" />
+</head>
+
+<body>
+  <div class="page">
+    <header class="page-top">
+      <h1 id="page-title">CCF 計測結果</h1>
+      <span id="page-meta" class="page-meta"></span>
+      <button type="button" id="button-list" hidden>一覧</button>
+      <button type="button" id="button-clear" hidden>一覧を消去</button>
+    </header>
+
+    <main id="detail" hidden>
+      <div class="summary">
+        <div id="r-ccf-block" class="r-ccf">
+          <div><span id="r-ccf" class="num"></span><span class="r-unit">%</span></div>
+          <span id="r-rating"></span>
+          <p id="r-legend" class="r-legend"></p>
+        </div>
+        <dl class="metrics">
+          <div><dt>心停止時間</dt><dd id="r-measured" class="num"></dd></div>
+          <div><dt>胸骨圧迫時間</dt><dd id="r-compressed" class="num"></dd></div>
+          <div id="r-first-row"><dt>初回胸骨圧迫まで</dt><dd id="r-first" class="num"></dd></div>
+          <div id="r-defib-row"><dt>初回除細動まで</dt><dd id="r-defib" class="num"></dd></div>
+          <div class="metric-sum"><dt>中断</dt><dd id="r-interruptions" class="num"></dd></div>
+        </dl>
+      </div>
+
+      <section class="timeline">
+        <h2>経過
+          <span class="key"><i class="key-compress"></i>胸骨圧迫</span>
+          <span class="key"><i class="key-gap"></i>中断</span>
+          <span class="key"><i class="key-over"></i>10秒を超えた中断</span>
+          <span class="key"><i class="key-defib"></i>初回除細動</span>
+        </h2>
+        <div id="r-bar" class="bar"></div>
+        <div id="r-ticks" class="ticks num"></div>
+      </section>
+
+      <ol id="r-chips" class="chips num"></ol>
+    </main>
+
+    <section id="list" hidden>
+      <div id="list-cards" class="cards"></div>
+      <p id="list-hint" class="list-hint"></p>
+    </section>
+
+    <p id="message" class="message" hidden></p>
+
+    <footer class="page-footer">川崎ECCトレーニングサイト CCF計測器 <small>ver2.0 試験版</small></footer>
+  </div>
+
+  <script src="js/timer.js"></script>
+  <script src="js/labels.js"></script>
+  <script src="js/share.js"></script>
+  <script src="js/result.js"></script>
+  <script src="js/offline.js"></script>
+</body>
+</html>

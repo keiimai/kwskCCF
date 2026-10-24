@@ -7,6 +7,8 @@
 
   var T = CCFTimer;
   var L = CCFLabels;
+  var Q = CCFQrCode;
+  var S = CCFShare;
   var timer = T.createTimer();
 
   // 心停止認識と初回除細動の直後は、ボタンの幅が変わる。
@@ -27,10 +29,15 @@
     summary: document.getElementById('log-summary'),
     log: document.getElementById('log'),
     finish: document.getElementById('button-finish'),
+    mainRow: document.getElementById('main-row'),
     main: document.getElementById('button-main'),
     defib: document.getElementById('button-defib'),
     defibLabel: document.getElementById('defib-label'),
-    defibElapsed: document.getElementById('defib-elapsed')
+    defibElapsed: document.getElementById('defib-elapsed'),
+    resultRow: document.getElementById('result-row'),
+    resultQr: document.getElementById('button-result-qr'),
+    share: document.getElementById('button-share'),
+    resultCanvas: document.getElementById('result-qr')
   };
 
   // 端末の時計（Date.now）を使う。
@@ -44,6 +51,7 @@
 
   var guardUntil = 0;
   var shownLogKey = '';
+  var shownResultUrl = '';
 
   function isRunning(status) {
     return status === 'pre' || status === 'compressing' || status === 'interrupted';
@@ -79,6 +87,11 @@
       setClass(el.main, 'tone-' + main.tone);
     }
     el.finish.hidden = !isRunning(snap.status);
+    el.mainRow.hidden = snap.status === 'finished';
+    el.resultRow.hidden = snap.status !== 'finished';
+    if (snap.status === 'finished') {
+      showResultQr(resultUrl(snap));
+    }
 
     // 初回除細動ボタンは、認識から押すまでの間だけ出す。経過時間は心停止時間と同じ
     el.defib.hidden = !isRunning(snap.status) || snap.firstDefibrillationDelay !== null;
@@ -135,6 +148,40 @@
     li.appendChild(span('log-duration', value));
     li.appendChild(span('log-note', note));
     return li;
+  }
+
+  // 結果ページのリンク。結果は # より後ろに入れる（サーバーには送られない）
+  function resultUrl(snap) {
+    var url = new URL('result.html', location.href);
+    url.hash = S.encodeResult(snap);
+    return url.href;
+  }
+
+  // 結果の QR コードは、終了したときに 1 回だけ描く
+  function showResultQr(url) {
+    if (url === shownResultUrl) {
+      return;
+    }
+    shownResultUrl = url;
+    var qr = Q.encode(url);
+    var border = 4;
+    var count = qr.size + border * 2;
+    // 拡大してもぼやけないよう、1 マスを整数のピクセルで大きめに描く
+    var scale = Math.max(1, Math.floor(600 / count));
+    var canvas = el.resultCanvas;
+    canvas.width = count * scale;
+    canvas.height = count * scale;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#000';
+    qr.modules.forEach(function (row, r) {
+      row.forEach(function (dark, c) {
+        if (dark) {
+          ctx.fillRect((c + border) * scale, (r + border) * scale, scale, scale);
+        }
+      });
+    });
   }
 
   function span(className, text) {
@@ -225,6 +272,24 @@
     afterAction();
   });
 
+  // 端末の共有メニュー（AirDrop・メールなど）でリンクを送る。使えない端末ではコピーする
+  el.share.addEventListener('click', function () {
+    var url = resultUrl(timer.snapshot(now()));
+    if (navigator.share) {
+      navigator.share({ title: L.shareTitle, url: url }).catch(function () {
+        // 共有メニューを閉じただけのときも、ここに来る
+      });
+    } else if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function () {
+        window.alert(L.copied);
+      }, function () {
+        window.prompt(L.copyPrompt, url);
+      });
+    } else {
+      window.prompt(L.copyPrompt, url);
+    }
+  });
+
   el.reset.addEventListener('click', function () {
     if (timer.snapshot(now()).status !== 'idle' && !window.confirm(L.resetConfirm)) {
       return;
@@ -240,5 +305,7 @@
   el.legend.textContent = L.legend(T.CCF_GOOD, T.CCF_ACCEPTABLE);
   el.finish.textContent = L.finishButton;
   el.defibLabel.textContent = L.defibButton;
+  el.resultQr.textContent = L.resultQrButton;
+  el.share.textContent = L.shareButton;
   loop();
 })();

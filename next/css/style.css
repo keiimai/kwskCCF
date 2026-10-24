@@ -69,8 +69,8 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
-button[hidden] {
-  display: none;
+[hidden] {
+  display: none !important;
 }
 
 header {
@@ -288,3 +288,29 @@ header {
 
 #button-defib.tone-defib { background-color: var(--warning-fill); color: var(--on-warning); }
 #button-defib.tone-late { background-color: var(--danger-fill); color: #fff; }
+
+/* 終了後は、計測のボタンの場所に結果を渡すボタンを出す */
+.result-row {
+  display: flex;
+  gap: 12px;
+}
+
+.result-row button {
+  flex: 1;
+  height: 72px;
+  font-size: clamp(17px, 5vw, 22px);
+  font-weight: bold;
+  border-radius: 12px;
+}
+
+#button-result-qr {
+  background-color: var(--start-fill);
+  color: #fff;
+  border: none;
+}
+
+#button-share {
+  background-color: #fff;
+  color: var(--text);
+  border: 1px solid #bbb;
+}
