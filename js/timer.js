@@ -116,18 +116,12 @@
       var m = measured(now);
       var c = compressed(now);
       var ccf = ccfPercent(c, m);
-      var overLimitCount = 0;
-      if (s.firstCompressionDelay !== null && isOverLimit(s.firstCompressionDelay)) {
-        overLimitCount++;
-      }
       var interruptions = s.interruptions.map(function (e) {
-        if (isOverLimit(e.duration)) {
-          overLimitCount++;
-        }
         return { start: e.start, duration: e.duration, final: e.final };
       });
       return {
         status: s.status,
+        finishedAt: s.status === 'finished' ? s.finishedAt : null,
         measured: m,
         compressed: c,
         ccf: ccf,
@@ -137,7 +131,7 @@
         // 今まさに続いている、圧迫していない時間（初回圧迫前・中断中のみ）
         currentGap: inGap() ? now - s.gapStartedAt : 0,
         interruptions: interruptions,
-        overLimitCount: overLimitCount
+        overLimitCount: countOverLimit(s.firstCompressionDelay, interruptions)
       };
     }
 
@@ -182,6 +176,17 @@
     return exceeds(ms, INTERRUPTION_LIMIT_MS);
   }
 
+  // 10 秒を超えた回数。初回胸骨圧迫までも数える
+  function countOverLimit(firstCompressionDelay, interruptions) {
+    var count = firstCompressionDelay !== null && isOverLimit(firstCompressionDelay) ? 1 : 0;
+    interruptions.forEach(function (e) {
+      if (isOverLimit(e.duration)) {
+        count++;
+      }
+    });
+    return count;
+  }
+
   // 60.0 秒までは良好、60.1 秒から遅すぎる
   function isDefibrillationLate(ms) {
     return exceeds(ms, DEFIBRILLATION_LIMIT_MS);
@@ -215,6 +220,7 @@
     ccfPercent: ccfPercent,
     rateCcf: rateCcf,
     isOverLimit: isOverLimit,
+    countOverLimit: countOverLimit,
     isDefibrillationLate: isDefibrillationLate,
     formatClock: formatClock,
     formatSeconds: formatSeconds

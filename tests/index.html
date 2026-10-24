@@ -17,6 +17,9 @@
   <ul id="results"></ul>
 
   <script src="../js/timer.js"></script>
+  <script src="../js/qrcode.js"></script>
+  <script src="../js/share.js"></script>
+  <script src="qrcode.fixtures.js"></script>
   <script>
     // 最小限のテスト用関数。ライブラリを入れずにブラウザだけで動かす
     var results = [];
@@ -41,6 +44,8 @@
     }
   </script>
   <script src="timer.test.js"></script>
+  <script src="share.test.js"></script>
+  <script src="qrcode.test.js"></script>
   <script>
     var failed = results.filter(function (r) { return !r.ok; }).length;
     var list = document.getElementById('results');

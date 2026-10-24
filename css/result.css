@@ -1,0 +1,351 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ * Copyright 2023-2026 keiimai
+ */
+
+/* 結果ページ（result.html）。PC やプロジェクター、iPad の大きな画面で見せる。色は style.css の先頭を使う */
+html,
+body {
+  height: auto;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.6vw, 20px);
+  min-height: 100vh;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: clamp(12px, 2vw, 28px) clamp(16px, 3vw, 44px);
+  box-sizing: border-box;
+}
+
+.page-top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+
+.page-top h1 {
+  margin: 0;
+  font-size: clamp(22px, 2.4vw, 34px);
+}
+
+.page-meta {
+  flex: 1;
+  font-size: clamp(15px, 1.6vw, 22px);
+  color: var(--muted);
+}
+
+#button-list,
+#button-clear {
+  font-size: 17px;
+  padding: 6px 18px;
+  background-color: #fff;
+  color: var(--muted);
+  border: 1px solid #bbb;
+}
+
+/* 上の段：左に CCF、右に時間と中断のまとめ */
+.summary {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: clamp(16px, 3vw, 40px);
+  align-items: center;
+}
+
+.r-ccf {
+  text-align: center;
+  font-weight: bold;
+}
+
+#r-ccf {
+  font-size: clamp(96px, 15vw, 230px);
+  line-height: 1;
+}
+
+.r-unit {
+  font-size: clamp(32px, 5vw, 76px);
+}
+
+#r-rating {
+  display: inline-block;
+  font-size: clamp(24px, 3vw, 44px);
+  padding: 4px 22px;
+  border-radius: 12px;
+  margin-top: 4px;
+}
+
+.rating-good #r-rating { background-color: var(--good-bg); }
+.rating-acceptable #r-rating { background-color: var(--acceptable-bg); }
+.rating-poor #r-rating { background-color: var(--poor-bg); }
+
+.r-legend {
+  margin: 10px 0 0;
+  font-size: clamp(12px, 1.2vw, 16px);
+  font-weight: normal;
+  color: var(--muted);
+  white-space: pre-line;
+}
+
+.metrics {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.metrics div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 6px 16px;
+  border-radius: 10px;
+  background-color: #f5f5f5;
+}
+
+.metrics dt {
+  font-size: clamp(16px, 1.8vw, 26px);
+  color: #444;
+}
+
+.metrics dd {
+  margin: 0;
+  font-size: clamp(24px, 2.9vw, 44px);
+  font-weight: bold;
+  text-align: right;
+}
+
+.metrics .good { background-color: var(--good-bg); }
+.metrics .good dt,
+.metrics .good dd { color: var(--good); }
+.metrics .over { background-color: var(--poor-bg); }
+.metrics .over dt,
+.metrics .over dd { color: var(--poor); }
+
+.metrics .metric-sum dd {
+  font-size: clamp(17px, 1.9vw, 28px);
+}
+
+.metrics b.over {
+  color: var(--poor);
+}
+
+/* 経過の帯。緑が胸骨圧迫、灰色が中断、赤が 10 秒を超えた中断 */
+.timeline h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 22px;
+  margin: 0 0 34px;
+  font-size: clamp(16px, 1.5vw, 20px);
+}
+
+.key {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: normal;
+  color: var(--muted);
+}
+
+.key i {
+  display: inline-block;
+  width: 18px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.key-compress { background-color: var(--good-fill); }
+.key-gap { background-color: #c9c9c9; }
+.key-over { background-color: var(--danger-fill); }
+.key i.key-defib { width: 4px; background-color: #111; }
+
+.bar {
+  position: relative;
+  height: clamp(32px, 4vw, 52px);
+  border-radius: 6px;
+  background-color: var(--good-fill);
+}
+
+.bar .gap {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background-color: #c9c9c9;
+}
+
+.bar .gap.over {
+  background-color: var(--danger-fill);
+}
+
+.defib-mark {
+  position: absolute;
+  top: -8px;
+  bottom: -8px;
+  width: 4px;
+  margin-left: -2px;
+  background-color: #111;
+}
+
+.defib-mark span {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.defib-mark span.start { left: 0; transform: none; }
+.defib-mark span.end { left: auto; right: 0; transform: none; }
+
+.ticks {
+  position: relative;
+  height: 22px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.ticks span {
+  position: absolute;
+  top: 4px;
+  transform: translateX(-50%);
+}
+
+.ticks span:first-child {
+  transform: none;
+}
+
+/* 初回胸骨圧迫までと、中断を 1 つずつ */
+.chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chips li {
+  font-size: clamp(15px, 1.5vw, 20px);
+  padding: 5px 12px;
+  border-radius: 8px;
+  background-color: #f3f3f3;
+}
+
+.chips li.over {
+  background-color: var(--poor-bg);
+  color: var(--poor);
+  font-weight: bold;
+}
+
+.chips small {
+  margin-left: 6px;
+  font-size: 0.75em;
+  color: var(--muted);
+}
+
+.chips li.over small {
+  color: inherit;
+}
+
+/* 結果の一覧 */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid #ddd;
+  border-radius: 14px;
+  background-color: #fff;
+  color: var(--text);
+  text-align: left;
+  font-size: 17px;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 20px;
+}
+
+.card-head span {
+  color: var(--muted);
+}
+
+.card-ccf {
+  text-align: center;
+  font-weight: bold;
+}
+
+.card-ccf b {
+  font-size: 88px;
+  line-height: 1;
+}
+
+.card-ccf small {
+  font-size: 30px;
+}
+
+.card-ccf em {
+  display: block;
+  width: fit-content;
+  margin: 4px auto 0;
+  padding: 2px 14px;
+  border-radius: 8px;
+  font-style: normal;
+  font-size: 22px;
+}
+
+.card-ccf.rating-good em { background-color: var(--good-bg); }
+.card-ccf.rating-acceptable em { background-color: var(--acceptable-bg); }
+.card-ccf.rating-poor em { background-color: var(--poor-bg); }
+
+.card-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background-color: #f5f5f5;
+}
+
+.card-row.good { background-color: var(--good-bg); color: var(--good); font-weight: bold; }
+.card-row.over { background-color: var(--poor-bg); color: var(--poor); font-weight: bold; }
+
+.list-hint,
+.message {
+  margin: 0;
+  font-size: 17px;
+  color: var(--muted);
+  white-space: pre-line;
+}
+
+.page-footer {
+  margin-top: auto;
+  font-size: 13px;
+  color: #777;
+}
+
+/* iPad の縦向きやスマホでは、上の段を縦に並べる */
+@media (max-width: 820px) {
+  .summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #r-ccf {
+    font-size: clamp(96px, 30vw, 200px);
+  }
+}

@@ -69,14 +69,18 @@ If not, see <https://www.gnu.org/licenses/>.
 
     <div class="controls">
       <button type="button" id="button-finish" hidden>終了（ROSC・蘇生中止）</button>
-      <div class="main-row">
+      <div id="main-row" class="main-row">
         <button type="button" id="button-main" class="tone-arrest">心停止認識</button>
         <button type="button" id="button-defib" hidden><span id="defib-label">初回除細動</span><span id="defib-elapsed" class="num"></span></button>
+      </div>
+      <div id="result-row" class="result-row" hidden>
+        <button type="button" id="button-result-qr">結果のQR</button>
+        <button type="button" id="button-share">結果を共有</button>
       </div>
     </div>
   </div>
 
-  <div id="qr-overlay" class="qr-overlay" role="dialog" aria-modal="true" aria-label="このページの QR コード" hidden>
+  <div id="qr-overlay" class="qr-overlay" data-opener="button-qr" role="dialog" aria-modal="true" aria-label="このページの QR コード" hidden>
     <p class="qr-heading">このページの QR コード</p>
     <!-- QR コードの画像と URL は src/make_qr.py で作る（手で書き換えない） -->
     <!-- qr:begin -->
@@ -88,8 +92,18 @@ If not, see <https://www.gnu.org/licenses/>.
     <button type="button" class="qr-close">閉じる</button>
   </div>
 
+  <div id="result-overlay" class="qr-overlay" data-opener="button-result-qr" role="dialog" aria-modal="true" aria-label="結果の QR コード" hidden>
+    <p class="qr-heading">結果の QR コード</p>
+    <canvas id="result-qr" class="qr-image" role="img" aria-label="結果ページを開く QR コード"></canvas>
+    <p class="qr-note">iPad などのカメラで読み取ると、<br />大きな画面で結果が開きます。</p>
+    <p class="qr-trademark">QRコードは株式会社デンソーウェーブの登録商標です</p>
+    <button type="button" class="qr-close">閉じる</button>
+  </div>
+
   <script src="js/timer.js"></script>
   <script src="js/labels.js"></script>
+  <script src="js/qrcode.js"></script>
+  <script src="js/share.js"></script>
   <script src="js/app.js"></script>
   <script src="js/qr.js"></script>
   <script src="js/offline.js"></script>

@@ -44,6 +44,40 @@
     summary: function (count, limitSeconds, overCount, longest) {
       var text = '中断 ' + count + '回 ・ ' + limitSeconds + '秒超 ' + overCount + '回';
       return longest === null ? text : text + ' ・ 最長 ' + longest + '秒';
-    }
+    },
+
+    // 終了後の結果の受け渡し
+    resultQrButton: '結果のQR',
+    shareButton: '結果を共有',
+    shareTitle: 'CCF 計測結果',
+    copied: '結果のリンクをコピーしました。',
+    copyPrompt: '結果のリンクです。コピーして送ってください。',
+
+    // 結果ページ（result.html）
+    resultTitle: 'CCF 計測結果',
+    resultMeta: function (number, finished) {
+      return (number === null ? '' : '結果 ' + number + ' ・ ') + finished + ' 終了';
+    },
+    resultNumber: function (number) {
+      return '結果 ' + number;
+    },
+    measuredLabel: '心停止時間',
+    times: '回',
+    overLabel: function (limitSeconds) {
+      return limitSeconds + '秒超';
+    },
+    longest: '最長',
+    overInterruptions: function (limitSeconds) {
+      return limitSeconds + '秒超の中断';
+    },
+    defibMark: '除細動',
+    listTitle: '結果の一覧',
+    listMeta: function (count) {
+      return 'この端末で開いた結果 ・ ' + count + ' 件';
+    },
+    listHint: 'それぞれの結果を押すと、その結果の詳しいページが開きます。',
+    listEmpty: 'まだ結果がありません。\nスマホで計測を終了し、「結果のQR」をこの端末のカメラで読み取ってください。',
+    clearConfirm: '結果の一覧を消去しますか？',
+    invalid: '結果を読み込めませんでした。\nQR コードを読み取り直すか、リンクを送り直してください。'
   };
 })(this);

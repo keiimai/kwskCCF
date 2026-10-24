@@ -34,7 +34,7 @@
 }
 
 /*
- * 画像は 1 マス = 1 ピクセルの小さな PNG。
+ * ページの QR は 1 マス = 1 ピクセルの小さな PNG、結果の QR は canvas に描く。
  * 画面の幅と高さの小さいほうに合わせて拡大し、ぼやけないようにマスの角をそのまま保つ。
  */
 .qr-image {
@@ -43,6 +43,12 @@
   height: auto;
   image-rendering: crisp-edges;
   image-rendering: pixelated;
+}
+
+.qr-note {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 .qr-url {
