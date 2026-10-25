@@ -37,7 +37,10 @@
     resultRow: document.getElementById('result-row'),
     resultQr: document.getElementById('button-result-qr'),
     share: document.getElementById('button-share'),
-    resultCanvas: document.getElementById('result-qr')
+    resultCanvas: document.getElementById('result-qr'),
+    shareOverlay: document.getElementById('share-overlay'),
+    shareMessage: document.getElementById('share-message'),
+    shareUrl: document.getElementById('share-url')
   };
 
   // 端末の時計（Date.now）を使う。
@@ -272,23 +275,37 @@
     afterAction();
   });
 
-  // 端末の共有メニュー（AirDrop・メールなど）でリンクを送る。使えない端末ではコピーする
+  // 端末の共有メニュー（AirDrop・LINE・メールなど）でリンクを送る。
+  // 共有メニューのない端末や、開けなかったときは、リンクを画面に出してコピーする
   el.share.addEventListener('click', function () {
     var url = resultUrl(timer.snapshot(now()));
-    if (navigator.share) {
-      navigator.share({ title: L.shareTitle, url: url }).catch(function () {
-        // 共有メニューを閉じただけのときも、ここに来る
-      });
-    } else if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url).then(function () {
-        window.alert(L.copied);
-      }, function () {
-        window.prompt(L.copyPrompt, url);
-      });
-    } else {
-      window.prompt(L.copyPrompt, url);
+    if (!navigator.share) {
+      showLink(url);
+      return;
     }
+    navigator.share({ title: L.shareTitle, url: url }).catch(function (e) {
+      // 共有メニューを自分で閉じたときは、何もしない
+      if (!e || e.name !== 'AbortError') {
+        showLink(url);
+      }
+    });
   });
+
+  // ブラウザの小窓（alert・prompt）は出ない環境があるので、ページの中に出す
+  function showLink(url) {
+    el.shareUrl.value = url;
+    el.shareMessage.textContent = '';
+    CCFOverlay.show(el.shareOverlay, el.share);
+    var copying = navigator.clipboard && navigator.clipboard.writeText ?
+      navigator.clipboard.writeText(url) : Promise.reject(new Error('no clipboard'));
+    copying.then(function () {
+      el.shareMessage.textContent = L.copied;
+    }, function () {
+      el.shareMessage.textContent = L.copyPrompt;
+      el.shareUrl.focus();
+      el.shareUrl.select();
+    });
+  }
 
   el.reset.addEventListener('click', function () {
     if (timer.snapshot(now()).status !== 'idle' && !window.confirm(L.resetConfirm)) {
