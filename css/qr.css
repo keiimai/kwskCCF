@@ -49,6 +49,22 @@
   margin: 0;
   font-size: 15px;
   line-height: 1.5;
+  white-space: pre-line;
+}
+
+/* 結果のリンク。押しても閉じず、選んでコピーできる */
+.share-url {
+  box-sizing: border-box;
+  width: min(90vw, 560px);
+  padding: 10px 12px;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  color: #111;
+  background-color: #f7f7f7;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 .qr-url {

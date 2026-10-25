@@ -50,8 +50,8 @@
     resultQrButton: '結果のQR',
     shareButton: '結果を共有',
     shareTitle: 'CCF 計測結果',
-    copied: '結果のリンクをコピーしました。',
-    copyPrompt: '結果のリンクです。コピーして送ってください。',
+    copied: '結果のリンクをコピーしました。\nメールや LINE などに貼り付けて送ってください。',
+    copyPrompt: '下のリンクをコピーして、メールや LINE などで送ってください。',
 
     // 結果ページ（result.html）
     resultTitle: 'CCF 計測結果',

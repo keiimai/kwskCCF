@@ -100,6 +100,13 @@ If not, see <https://www.gnu.org/licenses/>.
     <button type="button" class="qr-close">閉じる</button>
   </div>
 
+  <div id="share-overlay" class="qr-overlay" role="dialog" aria-modal="true" aria-label="結果のリンク" hidden>
+    <p class="qr-heading">結果のリンク</p>
+    <p id="share-message" class="qr-note"></p>
+    <input type="text" id="share-url" class="share-url qr-keep" readonly aria-label="結果のリンク" />
+    <button type="button" class="qr-close">閉じる</button>
+  </div>
+
   <script src="js/timer.js"></script>
   <script src="js/labels.js"></script>
   <script src="js/qrcode.js"></script>
