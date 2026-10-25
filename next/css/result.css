@@ -3,7 +3,10 @@
  * Copyright 2023-2026 keiimai
  */
 
-/* 結果ページ（result.html）。PC やプロジェクター、iPad の大きな画面で見せる。色は style.css の先頭を使う */
+/*
+ * 結果ページ（result.html）。色は style.css の先頭を使う。
+ * ここに書くのはスマホ用。iPad や PC など大きな画面用は、下の @media で上書きする
+ */
 html,
 body {
   height: auto;
@@ -12,69 +15,113 @@ body {
 .page {
   display: flex;
   flex-direction: column;
-  gap: clamp(10px, 1.6vw, 20px);
+  gap: 12px;
   min-height: 100vh;
   max-width: 1600px;
   margin: 0 auto;
-  padding: clamp(12px, 2vw, 28px) clamp(16px, 3vw, 44px);
+  /* 下に固定した「結果を渡す」ボタンの分を空ける */
+  padding: 12px 16px calc(88px + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 
+/* スマホでは、1 段目に「計測画面へ」と「一覧」、2 段目に見出しを置く */
 .page-top {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "back . buttons"
+    "heading heading heading";
   align-items: center;
-  flex-wrap: wrap;
-  gap: 8px 24px;
+  gap: 8px;
 }
 
-.page-top h1 {
+.back-link {
+  grid-area: back;
+  padding: 5px 12px;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  background-color: #fff;
+  color: var(--muted);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.page-heading {
+  grid-area: heading;
+}
+
+.page-heading h1 {
   margin: 0;
-  font-size: clamp(22px, 2.4vw, 34px);
+  font-size: 22px;
 }
 
 .page-meta {
-  flex: 1;
-  font-size: clamp(15px, 1.6vw, 22px);
+  display: block;
+  margin-top: 2px;
+  font-size: 14px;
   color: var(--muted);
+}
+
+.page-buttons {
+  grid-area: buttons;
+  display: flex;
+  gap: 8px;
 }
 
 #button-list,
 #button-clear {
-  font-size: 17px;
-  padding: 6px 18px;
+  padding: 5px 12px;
+  border: 1px solid #bbb;
   background-color: #fff;
   color: var(--muted);
-  border: 1px solid #bbb;
+  font-size: 14px;
 }
 
-/* 上の段：左に CCF、右に時間と中断のまとめ */
+/* スマホでは「結果を渡す」を画面の下に固定する */
+#button-handoff {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 10;
+  height: 56px;
+  border: none;
+  border-radius: 12px;
+  background-color: var(--start-fill);
+  color: #fff;
+  font-size: 19px;
+  font-weight: bold;
+}
+
+/* CCF と判定、時間と中断のまとめ */
 .summary {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-  gap: clamp(16px, 3vw, 40px);
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .r-ccf {
-  text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px 12px;
   font-weight: bold;
 }
 
 #r-ccf {
-  font-size: clamp(96px, 15vw, 230px);
+  font-size: 88px;
   line-height: 1;
 }
 
 .r-unit {
-  font-size: clamp(32px, 5vw, 76px);
+  font-size: 30px;
 }
 
 #r-rating {
-  display: inline-block;
-  font-size: clamp(24px, 3vw, 44px);
-  padding: 4px 22px;
-  border-radius: 12px;
-  margin-top: 4px;
+  padding: 3px 12px;
+  border-radius: 8px;
+  font-size: 20px;
 }
 
 .rating-good #r-rating { background-color: var(--good-bg); }
@@ -82,8 +129,10 @@ body {
 .rating-poor #r-rating { background-color: var(--poor-bg); }
 
 .r-legend {
-  margin: 10px 0 0;
-  font-size: clamp(12px, 1.2vw, 16px);
+  flex-basis: 100%;
+  margin: 0;
+  text-align: center;
+  font-size: 11px;
   font-weight: normal;
   color: var(--muted);
   white-space: pre-line;
@@ -93,27 +142,29 @@ body {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
+/* 中断のまとめのように長い値は、次の行の右に回す */
 .metrics div {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: baseline;
-  gap: 12px;
-  padding: 6px 16px;
-  border-radius: 10px;
+  gap: 0 12px;
+  padding: 5px 10px;
+  border-radius: 8px;
   background-color: #f5f5f5;
 }
 
 .metrics dt {
-  font-size: clamp(16px, 1.8vw, 26px);
+  font-size: 14px;
   color: #444;
 }
 
 .metrics dd {
-  margin: 0;
-  font-size: clamp(24px, 2.9vw, 44px);
+  margin: 0 0 0 auto;
+  font-size: 22px;
   font-weight: bold;
   text-align: right;
 }
@@ -126,7 +177,7 @@ body {
 .metrics .over dd { color: var(--poor); }
 
 .metrics .metric-sum dd {
-  font-size: clamp(17px, 1.9vw, 28px);
+  font-size: 16px;
 }
 
 .metrics b.over {
@@ -138,36 +189,36 @@ body {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px 22px;
-  margin: 0 0 34px;
-  font-size: clamp(16px, 1.5vw, 20px);
+  gap: 2px 12px;
+  margin: 4px 0 26px;
+  font-size: 15px;
 }
 
 .key {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 14px;
+  gap: 4px;
+  font-size: 11px;
   font-weight: normal;
   color: var(--muted);
 }
 
 .key i {
   display: inline-block;
-  width: 18px;
-  height: 12px;
+  width: 14px;
+  height: 9px;
   border-radius: 2px;
 }
 
 .key-compress { background-color: var(--good-fill); }
 .key-gap { background-color: #c9c9c9; }
 .key-over { background-color: var(--danger-fill); }
-.key i.key-defib { width: 4px; background-color: #111; }
+.key i.key-defib { width: 3px; background-color: #111; }
 
 .bar {
   position: relative;
-  height: clamp(32px, 4vw, 52px);
-  border-radius: 6px;
+  height: 28px;
+  border-radius: 5px;
   background-color: var(--good-fill);
 }
 
@@ -184,10 +235,10 @@ body {
 
 .defib-mark {
   position: absolute;
-  top: -8px;
-  bottom: -8px;
-  width: 4px;
-  margin-left: -2px;
+  top: -6px;
+  bottom: -6px;
+  width: 3px;
+  margin-left: -1px;
   background-color: #111;
 }
 
@@ -198,7 +249,7 @@ body {
   transform: translateX(-50%);
   margin-bottom: 2px;
   white-space: nowrap;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: bold;
 }
 
@@ -207,14 +258,14 @@ body {
 
 .ticks {
   position: relative;
-  height: 22px;
-  font-size: 13px;
+  height: 18px;
+  font-size: 11px;
   color: var(--muted);
 }
 
 .ticks span {
   position: absolute;
-  top: 4px;
+  top: 2px;
   transform: translateX(-50%);
 }
 
@@ -222,21 +273,34 @@ body {
   transform: none;
 }
 
-/* 初回胸骨圧迫までと、中断を 1 つずつ */
+/* 初回胸骨圧迫までと中断。スマホでは計測画面のログと同じく縦に並べる */
 .chips {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .chips li {
-  font-size: clamp(15px, 1.5vw, 20px);
-  padding: 5px 12px;
-  border-radius: 8px;
+  display: grid;
+  grid-template-columns: 8.6em 4.6em 1fr;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
   background-color: #f3f3f3;
+  font-size: 14px;
+}
+
+.chip-value {
+  text-align: right;
+}
+
+.chip-note {
+  font-size: 11px;
+  color: var(--muted);
 }
 
 .chips li.over {
@@ -245,13 +309,7 @@ body {
   font-weight: bold;
 }
 
-.chips small {
-  margin-left: 6px;
-  font-size: 0.75em;
-  color: var(--muted);
-}
-
-.chips li.over small {
+.chips li.over .chip-note {
   color: inherit;
 }
 
@@ -328,24 +386,194 @@ body {
 .list-hint,
 .message {
   margin: 0;
-  font-size: 17px;
+  font-size: 16px;
   color: var(--muted);
   white-space: pre-line;
 }
 
 .page-footer {
   margin-top: auto;
-  font-size: 13px;
+  font-size: 12px;
   color: #777;
 }
 
-/* iPad の縦向きやスマホでは、上の段を縦に並べる */
-@media (max-width: 820px) {
+/* iPad や PC など大きな画面（計測画面と同じ切り替え）。上の段を左右に分け、全体を大きくする */
+@media (min-width: 768px) and (min-height: 600px) {
+  .page {
+    gap: clamp(10px, 1.6vw, 20px);
+    padding: clamp(12px, 2vw, 28px) clamp(16px, 3vw, 44px);
+  }
+
+  .page-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 24px;
+  }
+
+  .page-heading {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 24px;
+  }
+
+  .page-heading h1 {
+    font-size: clamp(24px, 2.4vw, 34px);
+  }
+
+  .page-meta {
+    display: inline;
+    margin: 0;
+    font-size: clamp(16px, 1.6vw, 22px);
+  }
+
+  .page-buttons {
+    order: 1;
+    gap: 10px;
+  }
+
+  .back-link {
+    order: 2;
+  }
+
+  .back-link,
+  #button-list,
+  #button-clear {
+    padding: 6px 18px;
+    font-size: 17px;
+  }
+
+  #button-handoff {
+    position: static;
+    height: auto;
+    padding: 6px 18px;
+    border-radius: 8px;
+    font-size: 17px;
+  }
+
   .summary {
-    grid-template-columns: minmax(0, 1fr);
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: clamp(16px, 3vw, 40px);
+    align-items: center;
+  }
+
+  .r-ccf {
+    display: block;
+    text-align: center;
   }
 
   #r-ccf {
-    font-size: clamp(96px, 30vw, 200px);
+    font-size: clamp(120px, 15vw, 230px);
+  }
+
+  .r-unit {
+    font-size: clamp(40px, 5vw, 76px);
+  }
+
+  #r-rating {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 4px 22px;
+    border-radius: 12px;
+    font-size: clamp(24px, 3vw, 44px);
+  }
+
+  .r-legend {
+    margin-top: 10px;
+    font-size: clamp(12px, 1.2vw, 16px);
+  }
+
+  .metrics {
+    gap: 6px;
+  }
+
+  .metrics div {
+    flex-wrap: nowrap;
+    padding: 6px 16px;
+    border-radius: 10px;
+  }
+
+  .metrics dt {
+    font-size: clamp(16px, 1.8vw, 26px);
+  }
+
+  .metrics dd {
+    font-size: clamp(24px, 2.9vw, 44px);
+  }
+
+  .metrics .metric-sum dd {
+    font-size: clamp(17px, 1.9vw, 28px);
+  }
+
+  .timeline h2 {
+    gap: 4px 22px;
+    margin-bottom: 34px;
+    font-size: clamp(16px, 1.5vw, 20px);
+  }
+
+  .key {
+    gap: 6px;
+    font-size: 14px;
+  }
+
+  .key i {
+    width: 18px;
+    height: 12px;
+  }
+
+  .key i.key-defib {
+    width: 4px;
+  }
+
+  .bar {
+    height: clamp(32px, 4vw, 52px);
+    border-radius: 6px;
+  }
+
+  .defib-mark {
+    top: -8px;
+    bottom: -8px;
+    width: 4px;
+    margin-left: -2px;
+  }
+
+  .defib-mark span {
+    font-size: 14px;
+  }
+
+  .ticks {
+    height: 22px;
+    font-size: 13px;
+  }
+
+  /* 中断は横に並べる */
+  .chips {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chips li {
+    display: flex;
+    gap: 8px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: clamp(15px, 1.5vw, 20px);
+  }
+
+  .chip-note {
+    font-size: 0.75em;
+  }
+
+  .list-hint,
+  .message {
+    font-size: 17px;
+  }
+
+  .page-footer {
+    font-size: 13px;
   }
 }

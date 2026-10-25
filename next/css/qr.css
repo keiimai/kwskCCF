@@ -34,7 +34,7 @@
 }
 
 /*
- * ページの QR は 1 マス = 1 ピクセルの小さな PNG、結果の QR は canvas に描く。
+ * ページの QR は 1 マス = 1 ピクセルの小さな PNG、結果を渡す画面の図は canvas に描く。
  * 画面の幅と高さの小さいほうに合わせて拡大し、ぼやけないようにマスの角をそのまま保つ。
  */
 .qr-image {
@@ -52,8 +52,19 @@
   white-space: pre-line;
 }
 
-/* 結果のリンク。押しても閉じず、選んでコピーできる */
-.share-url {
+/* 結果を渡す画面。説明やリンクの欄が増えるぶん、図を少し小さくする */
+.handoff-qr {
+  width: min(70vw, 40vh);
+}
+
+.handoff-hint {
+  margin: 0;
+  font-size: 13px;
+  color: #555;
+}
+
+/* リンクの欄とボタンは、押しても画面を閉じない（.qr-keep） */
+.link-field {
   box-sizing: border-box;
   width: min(90vw, 560px);
   padding: 10px 12px;
@@ -65,6 +76,26 @@
   background-color: #f7f7f7;
   -webkit-user-select: text;
   user-select: text;
+}
+
+.handoff-send {
+  -webkit-appearance: none;
+  appearance: none;
+  width: min(90vw, 560px);
+  height: 52px;
+  border: none;
+  border-radius: 12px;
+  background-color: #2f3b45;
+  color: #fff;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.handoff-message:empty {
+  display: none;
 }
 
 .qr-url {

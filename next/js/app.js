@@ -7,7 +7,6 @@
 
   var T = CCFTimer;
   var L = CCFLabels;
-  var Q = CCFQrCode;
   var S = CCFShare;
   var timer = T.createTimer();
 
@@ -35,12 +34,8 @@
     defibLabel: document.getElementById('defib-label'),
     defibElapsed: document.getElementById('defib-elapsed'),
     resultRow: document.getElementById('result-row'),
-    resultQr: document.getElementById('button-result-qr'),
-    share: document.getElementById('button-share'),
-    resultCanvas: document.getElementById('result-qr'),
-    shareOverlay: document.getElementById('share-overlay'),
-    shareMessage: document.getElementById('share-message'),
-    shareUrl: document.getElementById('share-url')
+    showResult: document.getElementById('button-show-result'),
+    handoff: document.getElementById('button-handoff')
   };
 
   // 端末の時計（Date.now）を使う。
@@ -54,7 +49,6 @@
 
   var guardUntil = 0;
   var shownLogKey = '';
-  var shownResultUrl = '';
 
   function isRunning(status) {
     return status === 'pre' || status === 'compressing' || status === 'interrupted';
@@ -92,9 +86,6 @@
     el.finish.hidden = !isRunning(snap.status);
     el.mainRow.hidden = snap.status === 'finished';
     el.resultRow.hidden = snap.status !== 'finished';
-    if (snap.status === 'finished') {
-      showResultQr(resultUrl(snap));
-    }
 
     // 初回除細動ボタンは、認識から押すまでの間だけ出す。経過時間は心停止時間と同じ
     el.defib.hidden = !isRunning(snap.status) || snap.firstDefibrillationDelay !== null;
@@ -158,33 +149,6 @@
     var url = new URL('result.html', location.href);
     url.hash = S.encodeResult(snap);
     return url.href;
-  }
-
-  // 結果の QR コードは、終了したときに 1 回だけ描く
-  function showResultQr(url) {
-    if (url === shownResultUrl) {
-      return;
-    }
-    shownResultUrl = url;
-    var qr = Q.encode(url);
-    var border = 4;
-    var count = qr.size + border * 2;
-    // 拡大してもぼやけないよう、1 マスを整数のピクセルで大きめに描く
-    var scale = Math.max(1, Math.floor(600 / count));
-    var canvas = el.resultCanvas;
-    canvas.width = count * scale;
-    canvas.height = count * scale;
-    var ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#000';
-    qr.modules.forEach(function (row, r) {
-      row.forEach(function (dark, c) {
-        if (dark) {
-          ctx.fillRect((c + border) * scale, (r + border) * scale, scale, scale);
-        }
-      });
-    });
   }
 
   function span(className, text) {
@@ -275,37 +239,14 @@
     afterAction();
   });
 
-  // 端末の共有メニュー（AirDrop・LINE・メールなど）でリンクを送る。
-  // 共有メニューのない端末や、開けなかったときは、リンクを画面に出してコピーする
-  el.share.addEventListener('click', function () {
-    var url = resultUrl(timer.snapshot(now()));
-    if (!navigator.share) {
-      showLink(url);
-      return;
-    }
-    navigator.share({ title: L.shareTitle, url: url }).catch(function (e) {
-      // 共有メニューを自分で閉じたときは、何もしない
-      if (!e || e.name !== 'AbortError') {
-        showLink(url);
-      }
-    });
+  // この端末で結果ページを開く。結果は結果ページとこの端末の一覧に残る
+  el.showResult.addEventListener('click', function () {
+    location.href = resultUrl(timer.snapshot(now()));
   });
 
-  // ブラウザの小窓（alert・prompt）は出ない環境があるので、ページの中に出す
-  function showLink(url) {
-    el.shareUrl.value = url;
-    el.shareMessage.textContent = '';
-    CCFOverlay.show(el.shareOverlay, el.share);
-    var copying = navigator.clipboard && navigator.clipboard.writeText ?
-      navigator.clipboard.writeText(url) : Promise.reject(new Error('no clipboard'));
-    copying.then(function () {
-      el.shareMessage.textContent = L.copied;
-    }, function () {
-      el.shareMessage.textContent = L.copyPrompt;
-      el.shareUrl.focus();
-      el.shareUrl.select();
-    });
-  }
+  el.handoff.addEventListener('click', function () {
+    CCFHandoff.open(resultUrl(timer.snapshot(now())), el.handoff);
+  });
 
   el.reset.addEventListener('click', function () {
     if (timer.snapshot(now()).status !== 'idle' && !window.confirm(L.resetConfirm)) {
@@ -322,7 +263,7 @@
   el.legend.textContent = L.legend(T.CCF_GOOD, T.CCF_ACCEPTABLE);
   el.finish.textContent = L.finishButton;
   el.defibLabel.textContent = L.defibButton;
-  el.resultQr.textContent = L.resultQrButton;
-  el.share.textContent = L.shareButton;
+  el.showResult.textContent = L.showResultButton;
+  el.handoff.textContent = L.handoffButton;
   loop();
 })();

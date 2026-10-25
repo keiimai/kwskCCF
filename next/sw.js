@@ -16,6 +16,7 @@ var FILES = [
   'js/labels.js',
   'js/qrcode.js',
   'js/share.js',
+  'js/handoff.js',
   'js/app.js',
   'js/result.js',
   'js/qr.js',

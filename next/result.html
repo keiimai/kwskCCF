@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>川崎ECCトレーニングサイト CCF計測結果 ver2.0（試験版）</title>
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/qr.css" />
   <link rel="stylesheet" href="css/result.css" />
   <link rel="apple-touch-icon" href="icons/icon-180.png" />
   <meta name="theme-color" content="#228b22" />
@@ -14,10 +15,16 @@
 <body>
   <div class="page">
     <header class="page-top">
-      <h1 id="page-title">CCF 計測結果</h1>
-      <span id="page-meta" class="page-meta"></span>
-      <button type="button" id="button-list" hidden>一覧</button>
-      <button type="button" id="button-clear" hidden>一覧を消去</button>
+      <a href="./" class="back-link">計測画面へ</a>
+      <div class="page-heading">
+        <h1 id="page-title">CCF 計測結果</h1>
+        <span id="page-meta" class="page-meta"></span>
+      </div>
+      <div class="page-buttons">
+        <button type="button" id="button-handoff" hidden>結果を渡す</button>
+        <button type="button" id="button-list" hidden>一覧</button>
+        <button type="button" id="button-clear" hidden>一覧を消去</button>
+      </div>
     </header>
 
     <main id="detail" hidden>
@@ -60,10 +67,24 @@
     <footer class="page-footer">川崎ECCトレーニングサイト CCF計測器 <small>ver2.0 試験版</small></footer>
   </div>
 
+  <div id="handoff-overlay" class="qr-overlay" role="dialog" aria-modal="true" aria-label="結果を渡す" hidden>
+    <p class="qr-heading">結果を渡す</p>
+    <canvas id="handoff-qr" class="qr-image handoff-qr" role="img" aria-label="結果ページを開く図"></canvas>
+    <p class="qr-note">iPad などのカメラで読み取ると、<br />大きな画面で結果が開きます。</p>
+    <p class="handoff-hint">カメラで読めない PC には、リンクを送ります。</p>
+    <input type="text" id="handoff-url" class="link-field qr-keep" readonly aria-label="結果ページのリンク" />
+    <button type="button" id="handoff-send" class="handoff-send qr-keep"></button>
+    <p id="handoff-message" class="qr-note handoff-message" aria-live="polite"></p>
+    <button type="button" class="qr-close">閉じる</button>
+  </div>
+
   <script src="js/timer.js"></script>
   <script src="js/labels.js"></script>
+  <script src="js/qrcode.js"></script>
   <script src="js/share.js"></script>
+  <script src="js/handoff.js"></script>
   <script src="js/result.js"></script>
+  <script src="js/qr.js"></script>
   <script src="js/offline.js"></script>
 </body>
 </html>
