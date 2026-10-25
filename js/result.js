@@ -17,6 +17,7 @@
   var el = {
     title: document.getElementById('page-title'),
     meta: document.getElementById('page-meta'),
+    handoffButton: document.getElementById('button-handoff'),
     listButton: document.getElementById('button-list'),
     clearButton: document.getElementById('button-clear'),
     detail: document.getElementById('detail'),
@@ -107,6 +108,7 @@
     showOnly(el.detail);
     el.title.textContent = L.resultTitle;
     el.meta.textContent = L.resultMeta(number, dateTime(r.finishedAt));
+    el.handoffButton.hidden = false;
     el.listButton.hidden = false;
     el.clearButton.hidden = true;
 
@@ -194,21 +196,22 @@
     }
   }
 
+  // 計測画面のログと同じく「見出し・長さ・始まった時刻」。大きな画面では横に並べる
   function renderChips(r) {
     el.chips.textContent = '';
     var first = r.firstCompressionDelay;
-    chip(first !== null && T.isOverLimit(first), L.firstCompression + ' ' +
-      (first === null ? L.noCompression : seconds(first)), '');
+    chip(first !== null && T.isOverLimit(first), L.firstCompression,
+      first === null ? L.noCompression : seconds(first), '');
     r.interruptions.forEach(function (e, i) {
       var note = T.formatClock(e.start) + '〜' + (e.final ? ' ' + L.finalTag : '');
-      chip(T.isOverLimit(e.duration), '#' + (i + 1) + ' ' + seconds(e.duration), note);
+      chip(T.isOverLimit(e.duration), '#' + (i + 1), seconds(e.duration), note);
     });
 
-    function chip(over, text, note) {
-      var li = node('li', over ? 'over' : '', text);
-      if (note) {
-        li.appendChild(node('small', '', note));
-      }
+    function chip(over, label, value, note) {
+      var li = node('li', over ? 'over' : '');
+      li.appendChild(node('span', 'chip-label', label));
+      li.appendChild(node('span', 'chip-value', value));
+      li.appendChild(node('span', 'chip-note', note));
       el.chips.appendChild(li);
     }
   }
@@ -218,6 +221,7 @@
     var list = loadList();
     el.title.textContent = L.listTitle;
     el.meta.textContent = L.listMeta(list.length);
+    el.handoffButton.hidden = true;
     el.listButton.hidden = true;
     el.clearButton.hidden = list.length === 0;
     el.cards.textContent = '';
@@ -265,6 +269,7 @@
     showOnly(el.message);
     el.title.textContent = L.resultTitle;
     el.meta.textContent = '';
+    el.handoffButton.hidden = true;
     el.listButton.hidden = false;
     el.clearButton.hidden = true;
     el.message.textContent = text;
@@ -284,6 +289,10 @@
     }
     window.scrollTo(0, 0);
   }
+
+  el.handoffButton.addEventListener('click', function () {
+    CCFHandoff.open(location.href, el.handoffButton);
+  });
 
   el.listButton.addEventListener('click', function () {
     location.hash = '';
