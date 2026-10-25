@@ -135,6 +135,20 @@
       };
     }
 
+    // 保存用に、今の状態を写して返す（ページを開き直しても続きから表示するため）
+    function exportState() {
+      return JSON.parse(JSON.stringify(s));
+    }
+
+    // exportState で保存した状態に戻す。形が合わなければ何もせず false を返す
+    function importState(saved) {
+      if (!isValidState(saved)) {
+        return false;
+      }
+      s = JSON.parse(JSON.stringify(saved));
+      return true;
+    }
+
     reset();
     return {
       recognizeArrest: recognizeArrest,
@@ -142,8 +156,30 @@
       recordDefibrillation: recordDefibrillation,
       finish: finish,
       reset: reset,
-      snapshot: snapshot
+      snapshot: snapshot,
+      exportState: exportState,
+      importState: importState
     };
+  }
+
+  var STATUSES = ['idle', 'pre', 'compressing', 'interrupted', 'finished'];
+  var TIME_KEYS = ['recognizedAt', 'finishedAt', 'compressedBefore', 'compressStartedAt', 'gapStartedAt'];
+
+  function isNumber(v) {
+    return typeof v === 'number' && isFinite(v);
+  }
+
+  function isValidState(x) {
+    if (!x || STATUSES.indexOf(x.status) < 0 || !Array.isArray(x.interruptions)) {
+      return false;
+    }
+    return TIME_KEYS.every(function (key) {
+      return isNumber(x[key]);
+    }) && [x.firstCompressionDelay, x.firstDefibrillationDelay].every(function (v) {
+      return v === null || isNumber(v);
+    }) && x.interruptions.every(function (e) {
+      return e && isNumber(e.start) && isNumber(e.duration) && typeof e.final === 'boolean';
+    });
   }
 
   // CCF（%）。小数点以下は切り捨て。

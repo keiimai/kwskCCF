@@ -50,6 +50,30 @@
   var guardUntil = 0;
   var shownLogKey = '';
 
+  // 計測の状態はこのタブの中に保存し、結果ページから戻ったときや開き直したときに続きから表示する。
+  // タブごとに分けるため sessionStorage を使う（タブを閉じると消える）
+  var STORAGE_KEY = 'ccf-timer:' + location.pathname.replace(/[^\/]*$/, '');
+
+  function saveState() {
+    try {
+      window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ savedAt: now(), state: timer.exportState() }));
+    } catch (e) {
+      // 保存できない端末でも、計測はそのまま使える
+    }
+  }
+
+  function restoreState() {
+    try {
+      var saved = JSON.parse(window.sessionStorage.getItem(STORAGE_KEY));
+      if (saved && timer.importState(saved.state)) {
+        // 端末の時計が戻っていても、経過時間が減らないようにする
+        lastNow = Math.max(lastNow, Number(saved.savedAt) || 0);
+      }
+    } catch (e) {
+      // 読めなければ、最初の状態から始める
+    }
+  }
+
   function isRunning(status) {
     return status === 'pre' || status === 'compressing' || status === 'interrupted';
   }
@@ -210,6 +234,7 @@
   }
 
   function afterAction() {
+    saveState();
     render();
     syncWakeLock();
   }
@@ -265,5 +290,7 @@
   el.defibLabel.textContent = L.defibButton;
   el.showResult.textContent = L.showResultButton;
   el.handoff.textContent = L.handoffButton;
+  restoreState();
+  syncWakeLock();
   loop();
 })();
