@@ -190,6 +190,36 @@
     equal(u.snapshot(7000).firstDefibrillationDelay, null);
   });
 
+  test('状態の保存と復元: 復元した後も同じように計測が続く', function () {
+    var t = createTimer();
+    t.recognizeArrest(0);
+    t.toggleCompression(3000);
+    t.recordDefibrillation(20000);
+    t.toggleCompression(30000);
+    var saved = JSON.parse(JSON.stringify(t.exportState()));
+    var u = createTimer();
+    equal(u.importState(saved), true);
+    equalList(u.snapshot(35000), t.snapshot(35000));
+    u.toggleCompression(36000);
+    u.finish(50000);
+    var s = u.snapshot(60000);
+    equal(s.status, 'finished');
+    equal(s.measured, 50000);
+    equal(s.compressed, 27000 + 14000);
+    equalList(s.interruptions, [{ start: 30000, duration: 6000, final: false }]);
+  });
+
+  test('状態の保存と復元: 形が合わないものは受け付けず、今の状態を保つ', function () {
+    var t = createTimer();
+    t.recognizeArrest(0);
+    equal(t.importState(null), false);
+    equal(t.importState({ status: 'running' }), false);
+    var broken = t.exportState();
+    broken.interruptions = [{ start: '1', duration: 2, final: false }];
+    equal(t.importState(broken), false);
+    equal(t.snapshot(1000).status, 'pre');
+  });
+
   test('リセットで最初の状態に戻る', function () {
     var t = createTimer();
     t.recognizeArrest(0);
