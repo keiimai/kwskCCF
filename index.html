@@ -43,7 +43,7 @@ If not, see <https://www.gnu.org/licenses/>.
       <span class="title">CCF計測器 <small>ver2.0</small></span>
       <div class="header-buttons">
         <button type="button" id="button-layout" hidden>スマホ版へ</button>
-        <button type="button" id="button-qr">QR</button>
+        <button type="button" id="button-qr">アプリを共有</button>
         <button type="button" id="button-reset">リセット</button>
       </div>
     </header>
@@ -82,8 +82,9 @@ If not, see <https://www.gnu.org/licenses/>.
     </div>
   </div>
 
-  <div id="qr-overlay" class="qr-overlay" data-opener="button-qr" role="dialog" aria-modal="true" aria-label="このページの QR コード" hidden>
-    <p class="qr-heading">このページの QR コード</p>
+  <div id="qr-overlay" class="qr-overlay" data-opener="button-qr" role="dialog" aria-modal="true" aria-label="アプリを共有" hidden>
+    <p class="qr-heading">アプリを共有</p>
+    <p class="qr-note">カメラで読み取ると、<br />この計測器が開きます。<br />計測の結果は入っていません。</p>
     <!-- QR コードの画像と URL は src/make_qr.py で作る（手で書き換えない） -->
     <!-- qr:begin -->
     <img class="qr-image" width="37" height="37" alt="QR コード：https://keiimai.github.io/kwskCCF/"

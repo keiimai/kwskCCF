@@ -77,6 +77,7 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
 }
 
 .title {
@@ -84,8 +85,15 @@ header {
   color: var(--muted);
 }
 
+/* 折り返すときは、版の表記を途中で切らない */
+.title small {
+  white-space: nowrap;
+}
+
+/* 狭い画面では、ボタンの文字を折り返さず、左の題名のほうを折り返す */
 .header-buttons {
   display: flex;
+  flex-shrink: 0;
   gap: 8px;
 }
 
@@ -93,7 +101,8 @@ header {
 #button-qr,
 #button-reset {
   font-size: 14px;
-  padding: 4px 12px;
+  padding: 4px 10px;
+  white-space: nowrap;
   background-color: #fff;
   color: var(--muted);
   border: 1px solid #bbb;
