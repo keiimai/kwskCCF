@@ -17,7 +17,7 @@ body {
   flex-direction: column;
   gap: 12px;
   min-height: 100vh;
-  max-width: 1600px;
+  max-width: 640px;
   margin: 0 auto;
   /* 下に固定した「結果を渡す」ボタンの分を空ける */
   padding: 12px 16px calc(88px + env(safe-area-inset-bottom));
@@ -69,7 +69,8 @@ body {
 }
 
 #button-list,
-#button-clear {
+#button-clear,
+#button-layout {
   padding: 5px 12px;
   border: 1px solid #bbb;
   background-color: #fff;
@@ -77,11 +78,11 @@ body {
   font-size: 14px;
 }
 
-/* スマホでは「結果を渡す」を画面の下に固定する */
+/* スマホでは「結果を渡す」を画面の下に固定する。大きな画面でスマホ版にしたときは、ページの幅に合わせる */
 #button-handoff {
   position: fixed;
-  left: 16px;
-  right: 16px;
+  left: max(16px, calc(50% - 304px));
+  right: max(16px, calc(50% - 304px));
   bottom: calc(12px + env(safe-area-inset-bottom));
   z-index: 10;
   height: 56px;
@@ -398,21 +399,25 @@ body {
   color: #777;
 }
 
-/* iPad や PC など大きな画面（計測画面と同じ切り替え）。上の段を左右に分け、全体を大きくする */
+/*
+ * iPad や PC など大きな画面（計測画面と同じ切り替え）。上の段を左右に分け、全体を大きくする。
+ * 「スマホ版へ」を押すと <html> から layout-auto が外れ、スマホ用の表示のままになる
+ */
 @media (min-width: 768px) and (min-height: 600px) {
-  .page {
+  .layout-auto .page {
+    max-width: 1600px;
     gap: clamp(10px, 1.6vw, 20px);
     padding: clamp(12px, 2vw, 28px) clamp(16px, 3vw, 44px);
   }
 
-  .page-top {
+  .layout-auto .page-top {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 8px 24px;
   }
 
-  .page-heading {
+  .layout-auto .page-heading {
     flex: 1;
     display: flex;
     flex-wrap: wrap;
@@ -420,33 +425,34 @@ body {
     gap: 4px 24px;
   }
 
-  .page-heading h1 {
+  .layout-auto .page-heading h1 {
     font-size: clamp(24px, 2.4vw, 34px);
   }
 
-  .page-meta {
+  .layout-auto .page-meta {
     display: inline;
     margin: 0;
     font-size: clamp(16px, 1.6vw, 22px);
   }
 
-  .page-buttons {
+  .layout-auto .page-buttons {
     order: 1;
     gap: 10px;
   }
 
-  .back-link {
+  .layout-auto .back-link {
     order: 2;
   }
 
-  .back-link,
-  #button-list,
-  #button-clear {
+  .layout-auto .back-link,
+  .layout-auto #button-list,
+  .layout-auto #button-clear,
+  .layout-auto #button-layout {
     padding: 6px 18px;
     font-size: 17px;
   }
 
-  #button-handoff {
+  .layout-auto #button-handoff {
     position: static;
     height: auto;
     padding: 6px 18px;
@@ -454,27 +460,27 @@ body {
     font-size: 17px;
   }
 
-  .summary {
+  .layout-auto .summary {
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
     gap: clamp(16px, 3vw, 40px);
     align-items: center;
   }
 
-  .r-ccf {
+  .layout-auto .r-ccf {
     display: block;
     text-align: center;
   }
 
-  #r-ccf {
+  .layout-auto #r-ccf {
     font-size: clamp(120px, 15vw, 230px);
   }
 
-  .r-unit {
+  .layout-auto .r-unit {
     font-size: clamp(40px, 5vw, 76px);
   }
 
-  #r-rating {
+  .layout-auto #r-rating {
     display: inline-block;
     margin-top: 4px;
     padding: 4px 22px;
@@ -482,84 +488,84 @@ body {
     font-size: clamp(24px, 3vw, 44px);
   }
 
-  .r-legend {
+  .layout-auto .r-legend {
     margin-top: 10px;
     font-size: clamp(12px, 1.2vw, 16px);
   }
 
-  .metrics {
+  .layout-auto .metrics {
     gap: 6px;
   }
 
-  .metrics div {
+  .layout-auto .metrics div {
     flex-wrap: nowrap;
     padding: 6px 16px;
     border-radius: 10px;
   }
 
-  .metrics dt {
+  .layout-auto .metrics dt {
     font-size: clamp(16px, 1.8vw, 26px);
   }
 
-  .metrics dd {
+  .layout-auto .metrics dd {
     font-size: clamp(24px, 2.9vw, 44px);
   }
 
-  .metrics .metric-sum dd {
+  .layout-auto .metrics .metric-sum dd {
     font-size: clamp(17px, 1.9vw, 28px);
   }
 
-  .timeline h2 {
+  .layout-auto .timeline h2 {
     gap: 4px 22px;
     margin-bottom: 34px;
     font-size: clamp(16px, 1.5vw, 20px);
   }
 
-  .key {
+  .layout-auto .key {
     gap: 6px;
     font-size: 14px;
   }
 
-  .key i {
+  .layout-auto .key i {
     width: 18px;
     height: 12px;
   }
 
-  .key i.key-defib {
+  .layout-auto .key i.key-defib {
     width: 4px;
   }
 
-  .bar {
+  .layout-auto .bar {
     height: clamp(32px, 4vw, 52px);
     border-radius: 6px;
   }
 
-  .defib-mark {
+  .layout-auto .defib-mark {
     top: -8px;
     bottom: -8px;
     width: 4px;
     margin-left: -2px;
   }
 
-  .defib-mark span {
+  .layout-auto .defib-mark span {
     font-size: 14px;
   }
 
-  .ticks {
+  .layout-auto .ticks {
     height: 22px;
     font-size: 13px;
   }
 
   /* 同じ幅の列に上から順に並べ、下まで来たら次の列へ続ける。
      列の数は画面の幅で決まる（iPad の縦向きで 2 列、横向きや PC で 3 列） */
-  .chips {
+  .layout-auto .chips {
     display: block;
     columns: 3 18em;
     column-gap: 12px;
     font-size: clamp(15px, 1.5vw, 20px);
   }
 
-  .chips li {
+  .layout-auto .chips li {
     grid-template-columns: 8.2em 4em 1fr;
     gap: 6px;
     margin-bottom: 8px;
@@ -570,17 +576,17 @@ body {
   }
 
   /* 「終了前」の途中で折り返さない */
-  .chip-note {
+  .layout-auto .chip-note {
     font-size: 0.75em;
     word-break: keep-all;
   }
 
-  .list-hint,
-  .message {
+  .layout-auto .list-hint,
+  .layout-auto .message {
     font-size: 17px;
   }
 
-  .page-footer {
+  .layout-auto .page-footer {
     font-size: 13px;
   }
 }

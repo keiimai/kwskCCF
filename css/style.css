@@ -89,6 +89,7 @@ header {
   gap: 8px;
 }
 
+#button-layout,
 #button-qr,
 #button-reset {
   font-size: 14px;
@@ -96,6 +97,17 @@ header {
   background-color: #fff;
   color: var(--muted);
   border: 1px solid #bbb;
+}
+
+/* スマホ版とタブレット版の切り替え（js/layout.js）。どちらの表示も使える大きな画面でだけ出す */
+#button-layout {
+  display: none;
+}
+
+@media (min-width: 768px) and (min-height: 600px) {
+  #button-layout {
+    display: inline-block;
+  }
 }
 
 .banner {
@@ -319,55 +331,57 @@ header {
 /*
  * iPad や PC のブラウザなど、大きな画面（幅 768px 以上・高さ 600px 以上）。
  * 機種ではなく画面の大きさで切り替える（iPad の Safari は Mac と名乗ることがあるため）。
- * iPhone の横向きは高さが足りないので、スマホ用のままにする
+ * iPhone の横向きは高さが足りないので、スマホ用のままにする。
+ * 「スマホ版へ」を押すと <html> から layout-auto が外れ、大きな画面でもスマホ用の表示になる
  */
 @media (min-width: 768px) and (min-height: 600px) {
-  .app {
+  .layout-auto .app {
     max-width: 1400px;
     gap: 12px;
     padding: 16px 24px calc(20px + env(safe-area-inset-bottom));
   }
 
-  .title,
-  #button-qr,
-  #button-reset { font-size: 16px; }
+  .layout-auto .title,
+  .layout-auto #button-layout,
+  .layout-auto #button-qr,
+  .layout-auto #button-reset { font-size: 16px; }
 
-  .banner {
+  .layout-auto .banner {
     padding: 12px 18px;
     font-size: clamp(24px, 3.2vh, 34px);
   }
 
-  #ccf-value { font-size: clamp(120px, 22vh, 240px); }
-  .ccf-unit { font-size: clamp(40px, 6vh, 72px); }
-  #ccf-rating { font-size: clamp(24px, 3.4vh, 36px); }
-  .legend { font-size: 14px; }
-  .times dt { font-size: 18px; }
-  .times dd { font-size: clamp(36px, 5.5vh, 56px); }
-  #log-summary { font-size: 16px; }
+  .layout-auto #ccf-value { font-size: clamp(120px, 22vh, 240px); }
+  .layout-auto .ccf-unit { font-size: clamp(40px, 6vh, 72px); }
+  .layout-auto #ccf-rating { font-size: clamp(24px, 3.4vh, 36px); }
+  .layout-auto .legend { font-size: 14px; }
+  .layout-auto .times dt { font-size: 18px; }
+  .layout-auto .times dd { font-size: clamp(36px, 5.5vh, 56px); }
+  .layout-auto #log-summary { font-size: 16px; }
 
-  .log-item {
+  .layout-auto .log-item {
     font-size: 18px;
     padding: 6px 10px;
   }
 
-  .log-note { font-size: 14px; }
+  .layout-auto .log-note { font-size: 14px; }
 
-  #button-finish {
+  .layout-auto #button-finish {
     height: 52px;
     font-size: 18px;
   }
 
-  #button-main {
+  .layout-auto #button-main {
     height: clamp(110px, 14vh, 160px);
     font-size: clamp(30px, 4vh, 40px);
   }
 
-  #button-defib {
+  .layout-auto #button-defib {
     width: 28%;
     font-size: clamp(22px, 3vh, 30px);
   }
 
-  .result-row button {
+  .layout-auto .result-row button {
     height: 88px;
     font-size: 26px;
   }
@@ -375,7 +389,7 @@ header {
 
 /* 大きな画面の横向き：左に CCF と時間、右にログを並べ、ボタンは下に横長に置く */
 @media (min-width: 768px) and (min-height: 600px) and (orientation: landscape) {
-  .app {
+  .layout-auto .app {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-rows: auto auto 1fr auto auto auto;
@@ -389,12 +403,12 @@ header {
     column-gap: 32px;
   }
 
-  header { grid-area: header; }
-  .banner { grid-area: banner; }
+  .layout-auto header { grid-area: header; }
+  .layout-auto .banner { grid-area: banner; }
   /* CCF は説明のすぐ上に寄せる */
-  .ccf { grid-area: ccf; align-self: end; }
-  .legend { grid-area: legend; }
-  .times { grid-area: times; }
-  .log-area { grid-area: log; }
-  .controls { grid-area: controls; }
+  .layout-auto .ccf { grid-area: ccf; align-self: end; }
+  .layout-auto .legend { grid-area: legend; }
+  .layout-auto .times { grid-area: times; }
+  .layout-auto .log-area { grid-area: log; }
+  .layout-auto .controls { grid-area: controls; }
 }
