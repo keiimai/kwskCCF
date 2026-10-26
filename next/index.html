@@ -96,8 +96,10 @@ If not, see <https://www.gnu.org/licenses/>.
 
   <div id="handoff-overlay" class="qr-overlay" role="dialog" aria-modal="true" aria-label="結果を渡す" hidden>
     <p class="qr-heading">結果を渡す</p>
+    <p id="handoff-summary" class="handoff-summary"></p>
     <canvas id="handoff-qr" class="qr-image handoff-qr" role="img" aria-label="結果ページを開く図"></canvas>
     <p class="qr-note">iPad などのカメラで読み取ると、<br />大きな画面で結果が開きます。</p>
+    <p class="handoff-check">開いた結果の終了時刻と CCF が、<br />上と同じか確かめてください。</p>
     <p class="handoff-hint">カメラで読めない PC には、リンクを送ります。</p>
     <input type="text" id="handoff-url" class="link-field qr-keep" readonly aria-label="結果ページのリンク" />
     <button type="button" id="handoff-send" class="handoff-send qr-keep"></button>

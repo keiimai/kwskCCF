@@ -13,7 +13,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /* 画面の高さに収まらないときは、上下を切らずにスクロールできるようにする */
+  justify-content: flex-start;
+  overflow-y: auto;
   gap: 16px;
   padding: 16px;
   box-sizing: border-box;
@@ -21,6 +23,15 @@
   color: #111;
   font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
   text-align: center;
+}
+
+/* 収まるときは上下の余白を同じにして、真ん中に置く */
+.qr-overlay > :first-child {
+  margin-top: auto;
+}
+
+.qr-overlay > :last-child {
+  margin-bottom: auto;
 }
 
 .qr-overlay[hidden] {
@@ -52,9 +63,52 @@
   white-space: pre-line;
 }
 
-/* 結果を渡す画面。説明やリンクの欄が増えるぶん、図を少し小さくする */
+/* 結果を渡す画面。説明やリンクの欄が増えるぶん、図を少し小さくし、間を詰める */
+#handoff-overlay {
+  gap: 12px;
+}
+
 .handoff-qr {
-  width: min(70vw, 40vh);
+  width: min(70vw, 34vh);
+}
+
+/* 渡す結果の終了時刻と CCF */
+.handoff-summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 4px 14px;
+  margin: 0;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background-color: #f3f3f3;
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.handoff-summary b {
+  font-size: 24px;
+}
+
+.handoff-summary em {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-style: normal;
+}
+
+.handoff-ccf.rating-good em { background-color: var(--good-bg); }
+.handoff-ccf.rating-acceptable em { background-color: var(--acceptable-bg); }
+.handoff-ccf.rating-poor em { background-color: var(--poor-bg); }
+
+.handoff-check {
+  margin: 0;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 1.5;
+  color: #333;
 }
 
 .handoff-hint {

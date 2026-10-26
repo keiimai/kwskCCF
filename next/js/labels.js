@@ -58,6 +58,10 @@
     shareTitle: 'CCF 計測結果',
     copied: 'リンクをコピーしました。\nメールや LINE などに貼り付けて送ってください。',
     copyPrompt: '上のリンクを選んで、コピーしてください。',
+    // 「結果を渡す」で、受け取った端末の結果ページと見比べるための表示
+    handoffFinished: function (clock) {
+      return clock + ' 終了';
+    },
 
     // 結果ページ（result.html）
     resultTitle: 'CCF 計測結果',

@@ -9,12 +9,15 @@
   var L = CCFLabels;
   var S = CCFShare;
 
-  // 一覧はこの端末のブラウザにだけ残す。公開版と試験版で分ける
-  var STORAGE_KEY = 'ccf-results:' + location.pathname.replace(/[^\/]*$/, '');
+  // このページの場所（公開版と試験版で分ける）
+  var DIR = location.pathname.replace(/[^\/]*$/, '');
+  // 一覧はこの端末のブラウザにだけ残す
+  var STORAGE_KEY = 'ccf-results:' + DIR;
   var MAX_RESULTS = 100;
   var LIMIT_SECONDS = T.INTERRUPTION_LIMIT_MS / 1000;
 
   var el = {
+    backLink: document.querySelector('.back-link'),
     title: document.getElementById('page-title'),
     meta: document.getElementById('page-meta'),
     handoffButton: document.getElementById('button-handoff'),
@@ -227,7 +230,12 @@
     el.cards.textContent = '';
     el.hint.textContent = list.length === 0 ? L.listEmpty : L.listHint;
 
-    list.forEach(function (code, i) {
+    // 新しい結果を上に出す。番号は開いた順のまま
+    for (var i = list.length - 1; i >= 0; i--) {
+      addCard(list[i], i);
+    }
+
+    function addCard(code, i) {
       var r = S.decodeResult(code);
       if (!r) {
         return;
@@ -255,7 +263,7 @@
         location.hash = code;
       });
       el.cards.appendChild(card);
-    });
+    }
 
     function row(className, label, value) {
       var r = node('span', 'card-row' + (className ? ' ' + className : ''));
@@ -290,6 +298,52 @@
     window.scrollTo(0, 0);
   }
 
+  // 計測画面の「結果を表示」で開いたときは、「計測画面へ」で前の画面に戻る。
+  // 新しく計測画面を開くと、この結果ページが「戻る」の先に残り、次の計測のあとで古い結果を渡してしまうことがあるため。
+  // この中で別の結果を開いたあとは、ふつうのリンクとして計測画面を開く
+  var openedFromMeasure = isMeasurePage(document.referrer);
+
+  function isMeasurePage(url) {
+    try {
+      var u = new URL(url);
+      return u.origin === location.origin && (u.pathname === DIR || u.pathname === DIR + 'index.html');
+    } catch (e) {
+      return false;
+    }
+  }
+
+  el.backLink.addEventListener('click', function (e) {
+    if (openedFromMeasure && history.length > 1) {
+      e.preventDefault();
+      history.back();
+    }
+  });
+
+  // 別のタブで結果を開いたときや、このタブに戻ったときは、一覧を作り直す
+  function refreshList() {
+    if (!el.list.hidden) {
+      showList();
+    }
+  }
+
+  window.addEventListener('storage', function (e) {
+    if (e.key === STORAGE_KEY) {
+      refreshList();
+    }
+  });
+
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted) {
+      refreshList();
+    }
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') {
+      refreshList();
+    }
+  });
+
   el.handoffButton.addEventListener('click', function () {
     CCFHandoff.open(location.href, el.handoffButton);
   });
@@ -305,6 +359,9 @@
     }
   });
 
-  window.addEventListener('hashchange', route);
+  window.addEventListener('hashchange', function () {
+    openedFromMeasure = false;
+    route();
+  });
   route();
 })();
