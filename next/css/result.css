@@ -5,7 +5,7 @@
 
 /*
  * 結果ページ（result.html）。色は style.css の先頭を使う。
- * ここに書くのはスマホ用。iPad や PC など大きな画面用は、下の @media で上書きする
+ * ここに書くのはスマホ用。タブレット版（iPad や PC など大きな画面用）は、下の .layout-large で上書きする
  */
 html,
 body {
@@ -400,193 +400,191 @@ body {
 }
 
 /*
- * iPad や PC など大きな画面（計測画面と同じ切り替え）。上の段を左右に分け、全体を大きくする。
- * 「スマホ版へ」を押すと <html> から layout-auto が外れ、スマホ用の表示のままになる
+ * タブレット版（計測画面と同じ切り替え。style.css と js/layout.js を参照）。
+ * 上の段を左右に分け、全体を大きくする
  */
-@media (min-width: 768px) and (min-height: 600px) {
-  .layout-auto .page {
-    max-width: 1600px;
-    gap: clamp(10px, 1.6vw, 20px);
-    padding: clamp(12px, 2vw, 28px) clamp(16px, 3vw, 44px);
-  }
+.layout-large .page {
+  max-width: 1600px;
+  gap: clamp(10px, 1.6vw, 20px);
+  padding: clamp(12px, 2vw, 28px) clamp(16px, 3vw, 44px);
+}
 
-  .layout-auto .page-top {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px 24px;
-  }
+.layout-large .page-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+}
 
-  .layout-auto .page-heading {
-    flex: 1;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 4px 24px;
-  }
+.layout-large .page-heading {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 24px;
+}
 
-  .layout-auto .page-heading h1 {
-    font-size: clamp(24px, 2.4vw, 34px);
-  }
+.layout-large .page-heading h1 {
+  font-size: clamp(24px, 2.4vw, 34px);
+}
 
-  .layout-auto .page-meta {
-    display: inline;
-    margin: 0;
-    font-size: clamp(16px, 1.6vw, 22px);
-  }
+.layout-large .page-meta {
+  display: inline;
+  margin: 0;
+  font-size: clamp(16px, 1.6vw, 22px);
+}
 
-  .layout-auto .page-buttons {
-    order: 1;
-    gap: 10px;
-  }
+.layout-large .page-buttons {
+  order: 1;
+  gap: 10px;
+}
 
-  .layout-auto .back-link {
-    order: 2;
-  }
+.layout-large .back-link {
+  order: 2;
+}
 
-  .layout-auto .back-link,
-  .layout-auto #button-list,
-  .layout-auto #button-clear,
-  .layout-auto #button-layout {
-    padding: 6px 18px;
-    font-size: 17px;
-  }
+.layout-large .back-link,
+.layout-large #button-list,
+.layout-large #button-clear,
+.layout-large #button-layout {
+  padding: 6px 18px;
+  font-size: 17px;
+}
 
-  .layout-auto #button-handoff {
-    position: static;
-    height: auto;
-    padding: 6px 18px;
-    border-radius: 8px;
-    font-size: 17px;
-  }
+.layout-large #button-handoff {
+  position: static;
+  height: auto;
+  padding: 6px 18px;
+  border-radius: 8px;
+  font-size: 17px;
+}
 
-  .layout-auto .summary {
-    display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-    gap: clamp(16px, 3vw, 40px);
-    align-items: center;
-  }
+.layout-large .summary {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: clamp(16px, 3vw, 40px);
+  align-items: center;
+}
 
-  .layout-auto .r-ccf {
-    display: block;
-    text-align: center;
-  }
+.layout-large .r-ccf {
+  display: block;
+  text-align: center;
+}
 
-  .layout-auto #r-ccf {
-    font-size: clamp(120px, 15vw, 230px);
-  }
+.layout-large #r-ccf {
+  font-size: clamp(120px, 15vw, 230px);
+}
 
-  .layout-auto .r-unit {
-    font-size: clamp(40px, 5vw, 76px);
-  }
+.layout-large .r-unit {
+  font-size: clamp(40px, 5vw, 76px);
+}
 
-  .layout-auto #r-rating {
-    display: inline-block;
-    margin-top: 4px;
-    padding: 4px 22px;
-    border-radius: 12px;
-    font-size: clamp(24px, 3vw, 44px);
-  }
+.layout-large #r-rating {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 4px 22px;
+  border-radius: 12px;
+  font-size: clamp(24px, 3vw, 44px);
+}
 
-  .layout-auto .r-legend {
-    margin-top: 10px;
-    font-size: clamp(12px, 1.2vw, 16px);
-  }
+.layout-large .r-legend {
+  margin-top: 10px;
+  font-size: clamp(12px, 1.2vw, 16px);
+}
 
-  .layout-auto .metrics {
-    gap: 6px;
-  }
+.layout-large .metrics {
+  gap: 6px;
+}
 
-  .layout-auto .metrics div {
-    flex-wrap: nowrap;
-    padding: 6px 16px;
-    border-radius: 10px;
-  }
+.layout-large .metrics div {
+  flex-wrap: nowrap;
+  padding: 6px 16px;
+  border-radius: 10px;
+}
 
-  .layout-auto .metrics dt {
-    font-size: clamp(16px, 1.8vw, 26px);
-  }
+.layout-large .metrics dt {
+  font-size: clamp(16px, 1.8vw, 26px);
+}
 
-  .layout-auto .metrics dd {
-    font-size: clamp(24px, 2.9vw, 44px);
-  }
+.layout-large .metrics dd {
+  font-size: clamp(24px, 2.9vw, 44px);
+}
 
-  .layout-auto .metrics .metric-sum dd {
-    font-size: clamp(17px, 1.9vw, 28px);
-  }
+.layout-large .metrics .metric-sum dd {
+  font-size: clamp(17px, 1.9vw, 28px);
+}
 
-  .layout-auto .timeline h2 {
-    gap: 4px 22px;
-    margin-bottom: 34px;
-    font-size: clamp(16px, 1.5vw, 20px);
-  }
+.layout-large .timeline h2 {
+  gap: 4px 22px;
+  margin-bottom: 34px;
+  font-size: clamp(16px, 1.5vw, 20px);
+}
 
-  .layout-auto .key {
-    gap: 6px;
-    font-size: 14px;
-  }
+.layout-large .key {
+  gap: 6px;
+  font-size: 14px;
+}
 
-  .layout-auto .key i {
-    width: 18px;
-    height: 12px;
-  }
+.layout-large .key i {
+  width: 18px;
+  height: 12px;
+}
 
-  .layout-auto .key i.key-defib {
-    width: 4px;
-  }
+.layout-large .key i.key-defib {
+  width: 4px;
+}
 
-  .layout-auto .bar {
-    height: clamp(32px, 4vw, 52px);
-    border-radius: 6px;
-  }
+.layout-large .bar {
+  height: clamp(32px, 4vw, 52px);
+  border-radius: 6px;
+}
 
-  .layout-auto .defib-mark {
-    top: -8px;
-    bottom: -8px;
-    width: 4px;
-    margin-left: -2px;
-  }
+.layout-large .defib-mark {
+  top: -8px;
+  bottom: -8px;
+  width: 4px;
+  margin-left: -2px;
+}
 
-  .layout-auto .defib-mark span {
-    font-size: 14px;
-  }
+.layout-large .defib-mark span {
+  font-size: 14px;
+}
 
-  .layout-auto .ticks {
-    height: 22px;
-    font-size: 13px;
-  }
+.layout-large .ticks {
+  height: 22px;
+  font-size: 13px;
+}
 
-  /* 同じ幅の列に上から順に並べ、下まで来たら次の列へ続ける。
-     列の数は画面の幅で決まる（iPad の縦向きで 2 列、横向きや PC で 3 列） */
-  .layout-auto .chips {
-    display: block;
-    columns: 3 18em;
-    column-gap: 12px;
-    font-size: clamp(15px, 1.5vw, 20px);
-  }
+/* 同じ幅の列に上から順に並べ、下まで来たら次の列へ続ける。
+   列の数は画面の幅で決まる（iPad の縦向きで 2 列、横向きや PC で 3 列） */
+.layout-large .chips {
+  display: block;
+  columns: 3 18em;
+  column-gap: 12px;
+  font-size: clamp(15px, 1.5vw, 20px);
+}
 
-  .layout-auto .chips li {
-    grid-template-columns: 8.2em 4em 1fr;
-    gap: 6px;
-    margin-bottom: 8px;
-    padding: 5px 10px;
-    border-radius: 8px;
-    font-size: inherit;
-    break-inside: avoid;
-  }
+.layout-large .chips li {
+  grid-template-columns: 8.2em 4em 1fr;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: inherit;
+  break-inside: avoid;
+}
 
-  /* 「終了前」の途中で折り返さない */
-  .layout-auto .chip-note {
-    font-size: 0.75em;
-    word-break: keep-all;
-  }
+/* 「終了前」の途中で折り返さない */
+.layout-large .chip-note {
+  font-size: 0.75em;
+  word-break: keep-all;
+}
 
-  .layout-auto .list-hint,
-  .layout-auto .message {
-    font-size: 17px;
-  }
+.layout-large .list-hint,
+.layout-large .message {
+  font-size: 17px;
+}
 
-  .layout-auto .page-footer {
-    font-size: 13px;
-  }
+.layout-large .page-footer {
+  font-size: 13px;
 }

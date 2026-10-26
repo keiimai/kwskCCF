@@ -90,7 +90,8 @@ function networkThenCache(request, key) {
     // 返事が遅いときは、保存しておいたファイルを先に使う
     var timer = setTimeout(fromCache, TIMEOUT_MS);
 
-    fetch(request).then(function (response) {
+    // 新しいファイルがあればすぐ使うよう、ブラウザに残っているものを使う前にサーバーへ確かめる
+    fetch(request, { cache: 'no-cache' }).then(function (response) {
       clearTimeout(timer);
       if (response.ok) {
         var copy = response.clone();

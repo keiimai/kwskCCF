@@ -2,55 +2,81 @@
 // Copyright 2023-2026 keiimai
 
 // スマホ版とタブレット版の切り替え。
-// 大きな画面では、ふだんは画面に合わせた表示（タブレット版）にし、
-// 「スマホ版へ」を押すと、<html> から layout-auto を外してスマホ用の表示にする。
+// <html> に layout-large を付けると、タブレット版（大きな画面用）の CSS が効く。
+// ふだんは画面の大きさで決め、「スマホ版へ」「タブレット版へ」で選んだときは、その表示をこの端末に残す。
 // 切り替えるのは見た目だけで、ページを読み込み直さないので、計測の状態や結果はそのまま残る。
-// 選んだ表示はこの端末に残す。読み込んだ直後に表示が入れ替わらないよう、<head> で読み込む
-(function () {
+// 読み込んだ直後に表示が入れ替わらないよう、<head> で読み込む
+(function (root) {
   'use strict';
 
   // 公開版と試験版で分ける。計測画面と結果ページは同じ設定にする
   var STORAGE_KEY = 'ccf-layout:' + location.pathname.replace(/[^\/]*$/, '');
-  var AUTO_CLASS = 'layout-auto';
+  var LARGE_CLASS = 'layout-large';
+
+  // ふだんタブレット版にする大きさ。機種ではなく画面の大きさで決める（iPad の Safari は Mac と名乗ることがあるため）。
+  // iPhone の横向きは高さが足りないので、スマホ版のままにする
+  var largeScreen = root.matchMedia('(min-width: 768px) and (min-height: 600px)');
+
+  // 切り替えボタンを出す端末の、画面の短い辺（px）。スマホより大きい端末（タブレットや PC）だけに出す。
+  // ウィンドウではなく端末の画面で決めるので、iPad mini の縦向きや、狭いウィンドウでも出る
+  var SWITCHABLE_SHORT_SIDE = 600;
+
   var html = document.documentElement;
 
-  function savedPhone() {
+  // 保存できない端末で選んだ表示（開いている間だけ使う）
+  var chosen = null;
+
+  function canSwitch() {
+    return Math.min(root.screen.width, root.screen.height) >= SWITCHABLE_SHORT_SIDE;
+  }
+
+  // 'phone' か 'tablet'。選んでいなければ null
+  function savedChoice() {
     try {
-      return window.localStorage.getItem(STORAGE_KEY) === 'phone';
+      var choice = root.localStorage.getItem(STORAGE_KEY);
+      return choice === 'phone' || choice === 'tablet' ? choice : null;
     } catch (e) {
-      return false;
+      return null;
     }
   }
 
-  function save(phone) {
+  function save(choice) {
     try {
-      if (phone) {
-        window.localStorage.setItem(STORAGE_KEY, 'phone');
-      } else {
-        window.localStorage.removeItem(STORAGE_KEY);
-      }
+      root.localStorage.setItem(STORAGE_KEY, choice);
     } catch (e) {
-      // 保存できない端末でも、開いている間は切り替えられる
+      chosen = choice;
     }
   }
 
-  // phone が true ならスマホ版、false なら画面の大きさに合わせる
-  function apply(phone) {
-    html.classList.toggle(AUTO_CLASS, !phone);
+  function isLarge() {
+    var choice = canSwitch() ? (savedChoice() || chosen) : null;
+    return choice ? choice === 'tablet' : largeScreen.matches;
+  }
+
+  function apply() {
+    var large = isLarge();
+    html.classList.toggle(LARGE_CLASS, large);
     var button = document.getElementById('button-layout');
-    if (button) {
-      button.textContent = phone ? CCFLabels.toTabletLayout : CCFLabels.toPhoneLayout;
+    if (button && root.CCFLabels) {
+      button.hidden = !canSwitch();
+      button.textContent = large ? root.CCFLabels.toPhoneLayout : root.CCFLabels.toTabletLayout;
     }
   }
 
-  apply(savedPhone());
+  apply();
+
+  // 向きを変えたときなど。選んでいなければ、画面の大きさに合わせ直す
+  if (largeScreen.addEventListener) {
+    largeScreen.addEventListener('change', apply);
+  } else {
+    largeScreen.addListener(apply);
+  }
 
   document.addEventListener('DOMContentLoaded', function () {
-    apply(savedPhone());
+    apply();
     document.getElementById('button-layout').addEventListener('click', function () {
-      var phone = html.classList.contains(AUTO_CLASS);
-      save(phone);
-      apply(phone);
+      save(html.classList.contains(LARGE_CLASS) ? 'phone' : 'tablet');
+      apply();
     });
   });
-})();
+})(this);
