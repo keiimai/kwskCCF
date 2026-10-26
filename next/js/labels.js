@@ -27,6 +27,10 @@
     defibButton: '初回除細動',
     resetConfirm: '計測結果を消去してリセットしますか？',
 
+    // 大きな画面で出す、表示の切り替えボタン（押すと切り替わる先）
+    toPhoneLayout: 'スマホ版へ',
+    toTabletLayout: 'タブレット版へ',
+
     rating: { good: '良好', acceptable: '許容', poor: '不可' },
 
     legend: function (good, acceptable) {

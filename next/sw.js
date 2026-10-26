@@ -14,6 +14,7 @@ var FILES = [
   'css/result.css',
   'js/timer.js',
   'js/labels.js',
+  'js/layout.js',
   'js/qrcode.js',
   'js/share.js',
   'js/handoff.js',
