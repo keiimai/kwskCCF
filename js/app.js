@@ -285,6 +285,16 @@
   // タブを離れると wake lock は自動で外れるので、戻ったときに取り直す
   document.addEventListener('visibilitychange', syncWakeLock);
 
+  // 「戻る」で、ブラウザが覚えていた前の画面に戻ったときも、保存してある最新の状態を出す。
+  // 前の画面のままだと、古い結果を「結果を渡す」で渡してしまうことがあるため
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted) {
+      restoreState();
+      shownLogKey = '';
+      syncWakeLock();
+    }
+  });
+
   el.legend.textContent = L.legend(T.CCF_GOOD, T.CCF_ACCEPTABLE);
   el.finish.textContent = L.finishButton;
   el.defibLabel.textContent = L.defibButton;

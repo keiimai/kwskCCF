@@ -9,9 +9,11 @@
 
   var L = root.CCFLabels;
   var Q = root.CCFQrCode;
+  var S = root.CCFShare;
 
   var el = {
     overlay: document.getElementById('handoff-overlay'),
+    summary: document.getElementById('handoff-summary'),
     canvas: document.getElementById('handoff-qr'),
     url: document.getElementById('handoff-url'),
     send: document.getElementById('handoff-send'),
@@ -41,11 +43,41 @@
     });
   }
 
+  function node(tag, className, text) {
+    var n = document.createElement(tag);
+    if (className) {
+      n.className = className;
+    }
+    if (text !== undefined) {
+      n.textContent = text;
+    }
+    return n;
+  }
+
+  // 渡す結果の終了時刻と CCF。受け取った端末の結果ページと同じか、見比べられるようにする
+  function summarize(url) {
+    el.summary.textContent = '';
+    var r = S.decodeResult(new URL(url).hash.slice(1));
+    el.summary.hidden = !r;
+    if (!r) {
+      return;
+    }
+    var d = new Date(r.finishedAt);
+    var clock = d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
+    el.summary.appendChild(node('span', '', L.handoffFinished(clock)));
+    var ccf = node('span', 'handoff-ccf rating-' + r.rating, 'CCF ');
+    ccf.appendChild(node('b', 'num', String(r.ccf)));
+    ccf.appendChild(document.createTextNode('%'));
+    ccf.appendChild(node('em', '', L.rating[r.rating]));
+    el.summary.appendChild(ccf);
+  }
+
   function open(url, opener) {
     if (url !== shownUrl) {
-      shownUrl = url;
       draw(url);
+      summarize(url);
       el.url.value = url;
+      shownUrl = url;
     }
     el.message.textContent = '';
     el.send.textContent = navigator.share ? L.sendLink : L.copyLink;
