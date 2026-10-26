@@ -109,19 +109,20 @@ body {
   font-weight: bold;
 }
 
+/* 計測画面と同じ大きさにする */
 #r-ccf {
-  font-size: 88px;
+  font-size: clamp(56px, 17vw, 96px);
   line-height: 1;
 }
 
 .r-unit {
-  font-size: 30px;
+  font-size: clamp(20px, 6vw, 36px);
 }
 
 #r-rating {
   padding: 3px 12px;
   border-radius: 8px;
-  font-size: 20px;
+  font-size: clamp(16px, 4.8vw, 24px);
 }
 
 .rating-good #r-rating { background-color: var(--good-bg); }
@@ -549,23 +550,29 @@ body {
     font-size: 13px;
   }
 
-  /* 中断は横に並べる */
+  /* 同じ幅の列に上から順に並べ、下まで来たら次の列へ続ける。
+     列の数は画面の幅で決まる（iPad の縦向きで 2 列、横向きや PC で 3 列） */
   .chips {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .chips li {
-    display: flex;
-    gap: 8px;
-    padding: 5px 12px;
-    border-radius: 8px;
+    display: block;
+    columns: 3 18em;
+    column-gap: 12px;
     font-size: clamp(15px, 1.5vw, 20px);
   }
 
+  .chips li {
+    grid-template-columns: 8.2em 4em 1fr;
+    gap: 6px;
+    margin-bottom: 8px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: inherit;
+    break-inside: avoid;
+  }
+
+  /* 「終了前」の途中で折り返さない */
   .chip-note {
     font-size: 0.75em;
+    word-break: keep-all;
   }
 
   .list-hint,

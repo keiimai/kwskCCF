@@ -196,7 +196,7 @@
     }
   }
 
-  // 計測画面のログと同じく「見出し・長さ・始まった時刻」。大きな画面では横に並べる
+  // 計測画面のログと同じく「見出し・長さ・始まった時刻」。大きな画面では列に分けて並べる
   function renderChips(r) {
     el.chips.textContent = '';
     var first = r.firstCompressionDelay;

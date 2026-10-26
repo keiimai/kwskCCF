@@ -121,17 +121,18 @@ header {
   font-weight: bold;
 }
 
+/* スマホでは、ログが見える高さを残すため大きくしすぎない */
 #ccf-value {
-  font-size: clamp(64px, 26vw, 160px);
+  font-size: clamp(56px, 17vw, 96px);
   line-height: 1;
 }
 
 .ccf-unit {
-  font-size: clamp(24px, 8vw, 56px);
+  font-size: clamp(20px, 6vw, 36px);
 }
 
 #ccf-rating {
-  font-size: clamp(18px, 5.5vw, 30px);
+  font-size: clamp(16px, 4.8vw, 24px);
   padding: 4px 12px;
   border-radius: 8px;
 }
