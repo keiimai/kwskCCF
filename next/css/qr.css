@@ -1,0 +1,174 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ * Copyright 2023-2026 keiimai
+ */
+
+.qr-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 画面の高さに収まらないときは、上下を切らずにスクロールできるようにする */
+  justify-content: flex-start;
+  overflow-y: auto;
+  gap: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+  background-color: #fff;
+  color: #111;
+  font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  text-align: center;
+}
+
+/* 収まるときは上下の余白を同じにして、真ん中に置く */
+.qr-overlay > :first-child {
+  margin-top: auto;
+}
+
+.qr-overlay > :last-child {
+  margin-bottom: auto;
+}
+
+.qr-overlay[hidden] {
+  display: none;
+}
+
+.qr-heading {
+  margin: 0;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/*
+ * ページの QR は 1 マス = 1 ピクセルの小さな PNG、結果を渡す画面の図は canvas に描く。
+ * 画面の幅と高さの小さいほうに合わせて拡大し、ぼやけないようにマスの角をそのまま保つ。
+ */
+.qr-image {
+  display: block;
+  width: min(80vw, 60vh);
+  height: auto;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+}
+
+.qr-note {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+/* 結果を渡す画面。説明やリンクの欄が増えるぶん、図を少し小さくし、間を詰める */
+#handoff-overlay {
+  gap: 12px;
+}
+
+.handoff-qr {
+  width: min(70vw, 34vh);
+}
+
+/* 渡す結果の終了時刻と CCF */
+.handoff-summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 4px 14px;
+  margin: 0;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background-color: #f3f3f3;
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.handoff-summary b {
+  font-size: 24px;
+}
+
+.handoff-summary em {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-style: normal;
+}
+
+.handoff-ccf.rating-good em { background-color: var(--good-bg); }
+.handoff-ccf.rating-acceptable em { background-color: var(--acceptable-bg); }
+.handoff-ccf.rating-poor em { background-color: var(--poor-bg); }
+
+.handoff-check {
+  margin: 0;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 1.5;
+  color: #333;
+}
+
+.handoff-hint {
+  margin: 0;
+  font-size: 13px;
+  color: #555;
+}
+
+/* リンクの欄とボタンは、押しても画面を閉じない（.qr-keep） */
+.link-field {
+  box-sizing: border-box;
+  width: min(90vw, 560px);
+  padding: 10px 12px;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  color: #111;
+  background-color: #f7f7f7;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.handoff-send {
+  -webkit-appearance: none;
+  appearance: none;
+  width: min(90vw, 560px);
+  height: 52px;
+  border: none;
+  border-radius: 12px;
+  background-color: #2f3b45;
+  color: #fff;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.handoff-message:empty {
+  display: none;
+}
+
+.qr-url {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+  word-break: break-all;
+}
+
+.qr-close {
+  -webkit-appearance: none;
+  appearance: none;
+  font-family: inherit;
+  font-size: 18px;
+  padding: 10px 32px;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #111;
+  cursor: pointer;
+  touch-action: manipulation;
+}

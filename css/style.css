@@ -1,0 +1,107 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ * Copyright 2016 Takeshi KODAKA (original: CCF 1.3.1)
+ * Copyright 2023-2026 keiimai (modifications)
+ */
+
+body {
+  margin: 0;
+  padding: 60px 8px 100px; /* 上下の固定ボタンに隠れないように */
+  background-color: #fff;
+  color: #000;
+  font-family: monospace;
+}
+
+button {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 5px;
+  border: 1px solid #DDD;
+  cursor: pointer;
+  font-size: 20px;
+  color: #fff;
+  background-color: #8FBC8F;
+  /* 連打したときにダブルタップで拡大されたり文字が選択されたりしないように */
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button.active {
+  background-color: #228B22;
+}
+
+#top-button-container,
+#bottom-button-container {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  padding: 10px 0;
+  box-sizing: border-box;
+  background-color: rgba(255, 255, 255, 0.9);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  gap: 2%;
+}
+
+#top-button-container {
+  top: 0;
+}
+
+#bottom-button-container {
+  bottom: 0;
+}
+
+#button-reset {
+  width: 73%;
+  height: 30px;
+  font-size: 18px;
+}
+
+#button-qr {
+  width: 20%;
+  height: 30px;
+  font-size: 18px;
+}
+
+#button-cc {
+  width: 63%;
+  height: 60px;
+}
+
+#button-cpr {
+  width: 35%;
+  height: 60px;
+}
+
+#time_cpr,
+#time_cc {
+  font-size: 16vw;
+  font-weight: bold;
+}
+
+#rate-status-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+#rate {
+  color: #228B22;
+  font-size: 35vw;
+}
+
+#status-text {
+  color: blue;
+  font-size: 20px;
+  font-weight: bold;
+  padding-left: 20px;
+  font-family: sans-serif;
+}
+
+#log_interruption {
+  font-size: 7vw;
+}
